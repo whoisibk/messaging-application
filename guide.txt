@@ -1,0 +1,24 @@
+messaging-app/
+│
+├── app/                   # Main FastAPI application
+│   ├── __init__.py
+│   ├── main.py            # Entry point for FastAPI
+│   ├── models.py          # Database models (User, Message, etc.)
+│   ├── schemas.py         # Request/response models (for validation)
+│   ├── database.py        # DB connection setup
+│   ├── auth.py            # Authentication (JWT, login/signup)
+│   ├── routes/            # All API routes separated logically
+│   │   ├── users.py
+│   │   ├── messages.py
+│   │   └── conversations.py
+│   └── websockets.py      # Real-time messaging handler
+│
+├── client/                # Optional: terminal-based client
+│   └── chat.py
+│
+├── tests/                 # Optional but recommended for practice
+│   └── test_api.py
+│
+├── requirements.txt       # Dependencies
+├── README.md
+└── .gitignore
