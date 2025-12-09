@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
-@router.get('/test')
+
+@router.get("/test")
 def conversation():
-    return {'This is a convo!'}
+    return {"This is a convo!"}

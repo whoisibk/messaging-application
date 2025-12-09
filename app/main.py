@@ -7,13 +7,13 @@ from routes.messages import router as messages_route
 from routes.conversations import router as conversations_route
 
 
-
 app = FastAPI()
 
-app.include_router(users_route, prefix='/users')
-app.include_router(messages_route, prefix='/messages')
-app.include_router(conversations_route, prefix='/conversations')
+app.include_router(users_route, prefix="/users")
+app.include_router(messages_route, prefix="/messages")
+app.include_router(conversations_route, prefix="/conversations")
 
-@app.get('/')
+
+@app.get("/")
 def test():
-    return {'message': 'Hello World!'}
+    return {"message": "Hello World!"}
