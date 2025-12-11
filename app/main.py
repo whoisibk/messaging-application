@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from routes.users import router as users_route
 from routes.messages import router as messages_route
 from routes.conversations import router as conversations_route
+import database
 
 
 app = FastAPI()
