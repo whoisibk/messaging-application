@@ -25,11 +25,11 @@ class Message(Base):
     messageId = Column(Integer, autoincrement=True, nullable=False, primary_key=True) 
 
     # retrieve sender and recipient via userId, 
-    senderId = Column(Integer, ForeignKey('userId'), nullable=False) 
-    recipientId = Column(Integer, nullable=False, unique=True)
+    senderId = Column(Integer, ForeignKey('user.userId', ondelete='CASCADE'), nullable=False) 
+    recipientId = Column(Integer, ForeignKey('user.userId', ondelete='CASCADE'), nullable=False, unique=True)
 
     # retrieve conversation (of which message is a part of) via conversationId
-    conversationId = Column(Integer, ForeignKey('conversationId', ondelete='CASCADE'), nullable=False)
+    conversationId = Column(Integer, ForeignKey('conversation.conversationId', ondelete='CASCADE'), nullable=False)
     
     messageText  = Column(String(250), nullable=False)
     timeStamp = Column(DateTime, nullable=False)
@@ -40,5 +40,5 @@ class Conversation(Base):
     conversationId = Column(Integer, nullable=False, unique=True, primary_key=True)
 
     # retrieve conversation participants via userId
-    user1_Id = Column(Integer, ForeignKey('userId'), nullable=False, unique=True)
-    user2_Id = Column(Integer, ForeignKey('userId'), nullable=False, unique=True)
+    user1_Id = Column(Integer, ForeignKey('user.userId'), nullable=False, unique=True)
+    user2_Id = Column(Integer, ForeignKey('user.userId'), nullable=False, unique=True)
