@@ -6,4 +6,4 @@ app/routes/__pycache__/
 
 venv
 
-DATABASE_URL=postgresql+psycopg2://postgres:Kingleo12?@localhost:5432/postgres
+.env
