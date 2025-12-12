@@ -12,15 +12,13 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 
 # establish connection to db
-connection = engine.connect() 
+connection = engine.connect()
 
 # create tables from predefined models
 Base.metadata.create_all(engine)
 
 Session = sessionmaker(bind=engine)
-session  = Session()
-
+session = Session()
 
 
 connection.close()
-
