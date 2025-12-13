@@ -3,7 +3,7 @@ from datetime import datetime
 from database import session
 from models import Conversation, Uuid
 
-def create_message(senderId: int, recipientId:int, messageText:str, timestamp: datetime) -> str:
+def create_message(senderId: Uuid, recipientId: Uuid, messageText:str, timestamp: datetime) -> str:
     new_message: Message = Message(senderId=senderId,
                           recipientId=recipientId,
                           messageText=messageText,
