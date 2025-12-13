@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Uuid # id generator
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey # column datatypes
 from sqlalchemy.ext.declarative import declarative_base
 
 # base class for ORM
@@ -9,7 +10,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "user"
 
-    userId = Column(Integer, autoincrement=True, unique=True, primary_key=True)
+    userId = Column(Uuid, unique=True, primary_key=True)
     userName = Column(String(15), unique=True, nullable=False)
     userEmail = Column(String(100), unique=True, nullable=False)
     passwordHash = Column(String(255), nullable=False)
@@ -22,14 +23,14 @@ class User(Base):
 class Message(Base):
     __tablename__ = "message"
 
-    messageId = Column(Integer, autoincrement=True, nullable=False, primary_key=True)
+    messageId = Column(Uuid, nullable=False, primary_key=True)
 
     # retrieve sender and recipient via userId,
     senderId = Column(
-        Integer, ForeignKey("user.userId", ondelete="CASCADE"), nullable=False
+        Uuid, ForeignKey("user.userId", ondelete="CASCADE"), nullable=False
     )
     recipientId = Column(
-        Integer,
+        Uuid,
         ForeignKey("user.userId", ondelete="CASCADE"),
         nullable=False,
         unique=True,
@@ -37,7 +38,7 @@ class Message(Base):
 
     # retrieve conversation (of which message is a part of) via conversationId
     conversationId = Column(
-        Integer,
+        Uuid,
         ForeignKey("conversation.conversationId", ondelete="CASCADE"),
         nullable=False,
     )
@@ -49,8 +50,8 @@ class Message(Base):
 class Conversation(Base):
     __tablename__ = "conversation"
 
-    conversationId = Column(Integer, nullable=False, unique=True, primary_key=True)
+    conversationId = Column(Uuid, nullable=False, unique=True, primary_key=True)
 
     # retrieve conversation participants via userId
-    user1_Id = Column(Integer, ForeignKey("user.userId"), nullable=False, unique=True)
-    user2_Id = Column(Integer, ForeignKey("user.userId"), nullable=False, unique=True)
+    user1_Id = Column(Uuid, ForeignKey("user.userId"), nullable=False, unique=True)
+    user2_Id = Column(Uuid, ForeignKey("user.userId"), nullable=False, unique=True)
