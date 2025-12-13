@@ -24,7 +24,7 @@ def get_messages_by_conversation(conversationId: Uuid) -> List[Message]:
 
     return messages
 
-def get_message_by_id(messageId: Uuid) -> Message:
+def get_message_by_Id(messageId: Uuid) -> Message:
     db_session = session
     message: Message = db_session.query(Message).filter(Message.messageId==messageId).first()
     db_session.commit()
