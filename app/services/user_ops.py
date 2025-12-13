@@ -35,7 +35,7 @@ def get_user_by_userName(userName) -> User:
     return user
 
 
-def get_user_by_Id(userId: Uuid) -> User:
+def get_user_by_userId(userId: Uuid) -> User:
     # Retrieve a user from the database by userId
     db_session = session
     user: User = db_session.query(User).filter(User.userId == userId).first()
