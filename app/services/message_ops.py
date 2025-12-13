@@ -1,9 +1,9 @@
-from models import Message
+from typing import List # import List type hint
+from models import Conversation, Uuid, Message
 from datetime import datetime
 from database import session
-from models import Conversation, Uuid
 
-def create_message(senderId: Uuid, recipientId: Uuid, messageText:str, timestamp: datetime) -> str:
+def create_message(senderId: Uuid, recipientId: Uuid, messageText, timestamp: datetime) -> str:
     new_message: Message = Message(senderId=senderId,
                           recipientId=recipientId,
                           messageText=messageText,
@@ -15,10 +15,26 @@ def create_message(senderId: Uuid, recipientId: Uuid, messageText:str, timestamp
 
     return new_message
 
-def get_messages_by_conversation(conversationId: int):
+def get_messages_by_conversation(conversationId: Uuid) -> List[Message]:
 
     db_session = session
-    db_session.query(Conversation).filter(conversationId=conversationId)
+    messages: List[Message] = db_session.query(Conversation).filter(Conversation.conversationId==conversationId).all()
+    db_session.commit()
 
 
+    return messages
 
+def get_message_by_id(messageId: Uuid) -> Message:
+    db_session = session
+    message: Message = db_session.query(Message).filter(Message.messageId==messageId).first()
+    db_session.commit()
+
+
+    return message
+
+def delete_message(messageId: Uuid):
+    db_session = session
+    rows_deleted = db_session.query(Message).filter(Message.messageId==messageId).delete()
+    db_session.commit()
+    
+    return True if rows_deleted > 0 else False
