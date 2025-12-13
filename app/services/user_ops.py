@@ -6,7 +6,7 @@ from database import session
 
 
 def create_user(
-    userName, userEmail, passwordHash, firstName, lastName, dateCreated
+    userName: str, userEmail: str, passwordHash: str, firstName: str, lastName, dateCreated
 ) -> User:
 
     # Create a new user and add to the database
