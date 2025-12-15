@@ -17,7 +17,7 @@ class createUser(BaseModel):
         ..., min_length=12, max_length=256, description="user's email address"
     )
     password: str = Field(
-        ..., min_length=5, max_length=256, description="password of user"
+        ..., min_length=5, max_length=256, description="plain password of user"
     )
 
     firstName: str = Field(
