@@ -1,6 +1,6 @@
 from models import User, Uuid
 from database import session
-import datetime
+from datetime import datetime
 
 
 # from utils.hashing import hash_password, verify_password
@@ -32,14 +32,14 @@ def get_user_by_userName(userName) -> User:
     # Retrieve a user from the database by userName
     db_session = session
     user: User = db_session.query(User).filter(User.userName == userName).first()
-    return user
+    return user if user else None
 
 
 def get_user_by_Id(userId: Uuid) -> User:
     # Retrieve a user from the database by userId
     db_session = session
     user: User = db_session.query(User).filter(User.userId == userId).first()
-    return user
+    return user if user else None
 
 
 def verify_user_credentials(userName, passwordHash: str) -> bool:
