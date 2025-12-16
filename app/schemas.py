@@ -6,10 +6,11 @@ from models import User, Message, Conversation, Uuid, DateTime as datetime
 """""" """''PYDANTIC MODELS FOR USER  """ """""" """"""
 
 
-"""requirements for creating a user"""
 
 
 class createUser(BaseModel):
+    """requirements for creating a user"""
+
     userName: str = Field(
         ..., min_length=3, max_length=15, description="username of User"
     )
@@ -28,10 +29,19 @@ class createUser(BaseModel):
     )
 
 
-"""requirements for reading a user"""
+class loginUser(BaseModel):
+    '''requirements for logging in'''
+
+    userName: str = Field(..., description="user's username")
+    password: str = Field(..., description='user\'s password')
+
+
+
 
 
 class readUser(BaseModel):
+    """requirements for reading a user"""
+    
     userId: Uuid = Field(..., description="ID of user")
     userEmail: str = Field(
         ..., min_length=12, max_length=256, description="user's email address"
