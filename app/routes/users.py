@@ -1,4 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Depends, status, 
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, HTTPBearer, HTTPAuthorizationCredentialsz
+
 from schemas import createUser, readUser, loginUser
 from services.user_ops import *
 from utils.auth import *
@@ -8,6 +10,14 @@ router = APIRouter()
 
 @router.post("/signup", response_model=readUser)
 def signup(user: createUser) -> User:
+    """
+    Endpoint for user signup
+    Args:
+        user (createUser): User signup details
+    Returns:
+        User: Newly created user details
+    """
+
     new_user: readUser = create_user(
         firstName=user.firstName,
         lastName=user.lastName,
@@ -20,28 +30,57 @@ def signup(user: createUser) -> User:
     return get_user_by_userName(new_user.userName)
 
 
-@router.post("/login", response_model=str)
-def login(user: loginUser) -> str:
-    if get_user_by_userName(user.userName) is None:
-        return "User not found"
-    else:
-        if verify_password(user.userName, hash_password(user.password)):
-            pass
-        
-            userId = get_user_by_userName(user.userName).userId
-            return create_jwt_token({"userId": str(userId)})
-        else:
-            return "Invalid Credentials"
-    
+@router.post("/login", response_model=dict)
+def login(userLogin: OAuth2PasswordRequestForm = Depends()) -> dict:
+    """
+        Endpoint for user login.
+
+        This endpoint uses the OAuth2 standard password flow. It expects the 
+        credentials to be sent as form data (URL-encoded) rather than JSON.
+
+        Args:
+            form_data (OAuth2PasswordRequestForm): An object containing the 
+                'username' and 'password' extracted from the request form.
+
+        Returns:
+            dict: A dictionary containing the 'access_token' and 'token_type'.
+            
+        Raises:
+            HTTPException: 401 error if authentication fails.
+"""
+    userName, passwordhash = userLogin.username, hash_password(userLogin.password)
+
+    if not verify_password(userName, passwordhash):
+       raise HTTPException(
+           status_code=status.HTTP_401_UNAUTHORIZED,
+           detail="Incorrect username or password",
+           headers={"WWW-Authenticate": "Bearer"},
+       )
+    access_token = create_jwt_token(data={"userName": userName})
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.get("/me", response_model=readUser)
-def current_user(token: str)->User:
+def current_user(credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)) -> User:
+    """
+    Endpoint to get current logged in user details
+    Args:
+        token (str): JWT token of the logged in user
+    Returns:
+        User: Details of the current logged in user
+    """
     userId = decode_jwt_token(token)
     if userId:
         return get_user_by_Id(userId)
     return "Invalid or expired token"
 
-@router.get("{users_id}", response_model=readUser)
-def get_user_profile(userId: Uuid):
+
+@router.get("/{users_id}", response_model=readUser)
+def get_user_profile(userId: Uuid) -> User:
+    """
+    Endpoint to get user profile by userId
+    Args:
+        userId (Uuid): ID of the user
+    Returns:
+        User: Details of the user
+    """
     return get_user_by_Id(userId)
