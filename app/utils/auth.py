@@ -4,6 +4,7 @@ import os
 
 import bcrypt
 import jwt
+from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 
 load_dotenv()
 
@@ -55,7 +56,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 def create_jwt_token(data: dict) -> str:
     """
-    creating a JWT token for secure authentication and authorization
+        creating a JWT token for secure authentication and authorization
     Args:
         data (dict): data to be encoded in the token
 
@@ -76,3 +77,22 @@ def create_jwt_token(data: dict) -> str:
     encoded_jwt = jwt.encode(payload=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
 
     return encoded_jwt
+
+
+def decode_jwt_token(token: str) -> dict:
+    """"
+        Decodes a JWT token to retrieve userId
+    Args:
+        token(str): JWT token to be decoded
+
+    """""
+    try:
+        decoded_jwt = jwt.decode(jwt=token, algorithms=ALGORITHM, key=SECRET_KEY)
+    except ExpiredSignatureError:
+        print("Token has expired")
+        return None 
+    except InvalidTokenError:
+        print("Invalid Token")
+        return None
+
+    return decoded_jwt.get('userId')
