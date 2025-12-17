@@ -3,8 +3,14 @@ from dotenv import load_dotenv
 import os
 
 import bcrypt
-import jwt
-from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+
+'''
+Python implementation of the JOSE (JavaScript Object Signing and Encryption) standard. 
+It provides support for JWT (JSON Web Token) handling.from jose import jwt, JWTError 
+'''
+from jose import jwt, JWTError
+
+
 
 load_dotenv()
 
@@ -87,12 +93,9 @@ def decode_jwt_token(token: str) -> dict:
 
     """""
     try:
-        decoded_jwt = jwt.decode(jwt=token, algorithms=ALGORITHM, key=SECRET_KEY)
-    except ExpiredSignatureError:
-        print("Token has expired")
-        return None 
-    except InvalidTokenError:
-        print("Invalid Token")
+        payload = jwt.decode(jwt=token, algorithms=ALGORITHM, key=SECRET_KEY)
+        return payload.get('userName')
+    except JWTError:
+        print("Invalid Token or Expired Token")
         return None
 
-    return decoded_jwt.get('userId')
