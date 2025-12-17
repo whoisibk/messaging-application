@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-from schemas import createUser, readUser
+from schemas import createUser, readUser, loginUser
 from services.user_ops import *
-from utils.hashing import *
+from utils.auth import *
 
 router = APIRouter()
 
@@ -17,21 +17,31 @@ def signup(user: createUser) -> User:
         dateCreated=datetime.now(),
     )
     # return newly added user
-    return get_user_by_userName(user.userName)
+    return get_user_by_userName(new_user.userName)
 
 
-@router.post("/login", response_model=readUser)
-def login(userName, password) -> User:
-    if verify_password(userName, hash_password(password)):
-        return get_user_by_userName(userName)
+@router.post("/login", response_model=str)
+def login(user: loginUser) -> str:
+    if get_user_by_userName(user.userName) is None:
+        return "User not found"
     else:
-        return "Invalid Credentials"
+        if verify_password(user.userName, hash_password(user.password)):
+            pass
+        
+            userId = get_user_by_userName(user.userName).userId
+            return create_jwt_token({"userId": str(userId)})
+        else:
+            return "Invalid Credentials"
     
-@router.get("me", response_model=readUser)
-def current_user(userName):
-    return get_user_by_userName(userName)
 
 
-@router.get('{users_id}', response_model=readUser)
+@router.get("/me", response_model=readUser)
+def current_user(token: str)->User:
+    userId = decode_jwt_token(token)
+    if userId:
+        return get_user_by_Id(userId)
+    return "Invalid or expired token"
+
+@router.get("{users_id}", response_model=readUser)
 def get_user_profile(userId: Uuid):
     return get_user_by_Id(userId)
