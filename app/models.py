@@ -15,7 +15,7 @@ class User(Base):
     userEmail = Column(String(100), unique=True, nullable=False)
     passwordHash = Column(String(255), nullable=False)
     dateCreated = Column(DateTime, nullable=False)
-
+ 
     firstName = Column(String(50), nullable=False)
     lastName = Column(String(50), nullable=False)
 
