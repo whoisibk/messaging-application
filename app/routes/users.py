@@ -1,5 +1,5 @@
-from fastapi import APIRouter, HTTPException, Depends, status, 
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, HTTPBearer, HTTPAuthorizationCredentialsz
+from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, HTTPBearer, HTTPAuthorizationCredentials
 
 from schemas import createUser, readUser, loginUser
 from services.user_ops import *
@@ -60,18 +60,33 @@ def login(userLogin: OAuth2PasswordRequestForm = Depends()) -> dict:
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-def current_user(credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)) -> User:
+oauth2_scheme = HTTPBearer()
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)) -> User:
     """
-    Endpoint to get current logged in user details
+    Retrieve the current authenticated user's details.
+
+    This function extracts the JWT token from the HTTP Authorization header,
+    decodes it to obtain the username, and returns the corresponding user object.
+
     Args:
-        token (str): JWT token of the logged in user
+        credentials (HTTPAuthorizationCredentials): The HTTP Authorization credentials
+            containing the JWT token, injected via the oauth2_scheme dependency.
+
     Returns:
-        User: Details of the current logged in user
+        User: The user object containing details of the currently authenticated user.
+
+    Raises:
+        HTTPException: With status code 401 UNAUTHORIZED if the token is invalid,
+            expired, or does not contain a valid userName claim.
     """
-    userId = decode_jwt_token(token)
-    if userId:
-        return get_user_by_Id(userId)
-    return "Invalid or expired token"
+    token = credentials.credentials
+    userName = decode_jwt_token(token).get("userName")
+    if not userName:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail = "Invalid or Expired Token",
+        )
+    return get_user_by_userName(userName)
 
 
 @router.get("/{users_id}", response_model=readUser)
