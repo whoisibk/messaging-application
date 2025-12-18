@@ -24,6 +24,19 @@ def create_message(
     return new_message
 
 
+def get_messagesInConversation_by_userId(
+    userId: Uuid, conversationId: Uuid
+) -> List[Message]:
+    """get messages from a message sender with userId"""
+    db_session = session
+    messages = (
+        db_session.query(Message)
+        .filter(Message.senderId == userId, Message.conversationId == conversationId)
+        .all()
+    )
+    return messages
+
+
 def get_messages_by_conversation(conversationId: Uuid) -> List[Message]:
     """Retrieve messages by conversationId"""
     db_session = session
@@ -55,5 +68,4 @@ def delete_message(messageId: Uuid) -> bool:
         db_session.query(Message).filter(Message.messageId == messageId).delete()
     )
     db_session.commit()
-
     return True if rows_deleted > 0 else False
