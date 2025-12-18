@@ -72,6 +72,7 @@ class sentMessage(BaseModel):
         ..., min_length=1, max_length=256, description="the message itself"
     )
     timestamp: datetime = Field(..., description="timestamp of message")
+    conversationId: Uuid = Field(..., description="ID of conversation")
 
 
 class readMessage(BaseModel):
