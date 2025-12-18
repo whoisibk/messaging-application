@@ -1,5 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import (
+    OAuth2PasswordBearer,
+    OAuth2PasswordRequestForm,
+    HTTPBearer,
+    HTTPAuthorizationCredentials,
+)
 
 from schemas import createUser, readUser, loginUser
 from services.user_ops import *
@@ -33,35 +38,39 @@ def signup(user: createUser) -> User:
 @router.post("/login", response_model=dict)
 def login(userLogin: OAuth2PasswordRequestForm = Depends()) -> dict:
     """
-        Endpoint for user login.
+    Endpoint for user login.
 
-        This endpoint uses the OAuth2 standard password flow. It expects the 
-        credentials to be sent as form data (URL-encoded) rather than JSON.
+    This endpoint uses the OAuth2 standard password flow. It expects the
+    credentials to be sent as form data (URL-encoded) rather than JSON.
 
-        Args:
-            form_data (OAuth2PasswordRequestForm): An object containing the 
-                'username' and 'password' extracted from the request form.
+    Args:
+        form_data (OAuth2PasswordRequestForm): An object containing the
+            'username' and 'password' extracted from the request form.
 
-        Returns:
-            dict: A dictionary containing the 'access_token' and 'token_type'.
-            
-        Raises:
-            HTTPException: 401 error if authentication fails.
-"""
+    Returns:
+        dict: A dictionary containing the 'access_token' and 'token_type'.
+
+    Raises:
+        HTTPException: 401 error if authentication fails.
+    """
     userName, passwordhash = userLogin.username, hash_password(userLogin.password)
 
     if not verify_password(userName, passwordhash):
-       raise HTTPException(
-           status_code=status.HTTP_401_UNAUTHORIZED,
-           detail="Incorrect username or password",
-           headers={"WWW-Authenticate": "Bearer"},
-       )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     access_token = create_jwt_token(data={"userName": userName})
     return {"access_token": access_token, "token_type": "bearer"}
 
 
 oauth2_scheme = HTTPBearer()
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)) -> User:
+
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme),
+) -> User:
     """
     Retrieve the current authenticated user's details.
 
@@ -84,7 +93,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(oauth2_
     if not userName:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail = "Invalid or Expired Token",
+            detail="Invalid or Expired Token",
         )
     return get_user_by_userName(userName)
 
