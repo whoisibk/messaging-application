@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer
 
 from services.message_ops import create_message
@@ -50,3 +50,13 @@ def send_message(
     }
 
     # realtime convo will be integrated later during websockets
+
+@router.get("/messages", response_model=List[Message])
+def get_messages(conversationId: Uuid) ->List[Message]:
+    messages = get_messages_by_conversation(conversationId)
+    if not messages:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Conversation not found",
+            )
+    return messages
