@@ -6,8 +6,6 @@ from models import User, Message, Conversation, Uuid, DateTime as datetime
 """""" """''PYDANTIC MODELS FOR USER  """ """""" """"""
 
 
-
-
 class createUser(BaseModel):
     """requirements for creating a user"""
 
@@ -30,18 +28,15 @@ class createUser(BaseModel):
 
 
 class loginUser(BaseModel):
-    '''requirements for logging in'''
+    """requirements for logging in"""
 
     userName: str = Field(..., description="user's username")
-    password: str = Field(..., description='user\'s password')
-
-
-
+    password: str = Field(..., description="user's password")
 
 
 class readUser(BaseModel):
     """requirements for reading a user"""
-    
+
     userId: Uuid = Field(..., description="ID of user")
     userEmail: str = Field(
         ..., min_length=12, max_length=256, description="user's email address"
@@ -70,14 +65,13 @@ class createMessage(BaseModel):
     )
 
 
-class sendMessage(BaseModel):
+class sentMessage(BaseModel):
+    status_code: int = Field(..., description="HTTP Status Code of Message")
     senderId: Uuid = Field(..., description="ID of sender")
-    recipientId: Uuid = Field(..., description="ID of recipient")
-    conversationId: Uuid = Field(..., description="ID of conversation")
-
     messageText: str = Field(
         ..., min_length=1, max_length=256, description="the message itself"
     )
+    timestamp: datetime = Field(..., description="timestamp of message")
 
 
 class readMessage(BaseModel):
