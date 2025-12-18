@@ -4,9 +4,13 @@ from datetime import datetime
 from database import session
 
 
+"""    Service functions for message operations    """
+
+
 def create_message(
     senderId: Uuid, recipientId: Uuid, messageText, timestamp: datetime
-) -> str:
+) -> Message:
+    """Create a new message and add to the database"""
     new_message: Message = Message(
         senderId=senderId,
         recipientId=recipientId,
@@ -21,7 +25,7 @@ def create_message(
 
 
 def get_messages_by_conversation(conversationId: Uuid) -> List[Message]:
-
+    """Retrieve messages by conversationId"""
     db_session = session
     messages: List[Message] = (
         db_session.query(Conversation)
@@ -34,6 +38,7 @@ def get_messages_by_conversation(conversationId: Uuid) -> List[Message]:
 
 
 def get_message_by_Id(messageId: Uuid) -> Message:
+    """Retrieve a message by messageId"""
     db_session = session
     message: Message = (
         db_session.query(Message).filter(Message.messageId == messageId).first()
@@ -44,6 +49,7 @@ def get_message_by_Id(messageId: Uuid) -> Message:
 
 
 def delete_message(messageId: Uuid) -> bool:
+    """Delete a message by messageId"""
     db_session = session
     rows_deleted = (
         db_session.query(Message).filter(Message.messageId == messageId).delete()
