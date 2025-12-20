@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List
 from models import User, Message, Conversation, Uuid, DateTime as datetime
 
@@ -8,6 +8,9 @@ from models import User, Message, Conversation, Uuid, DateTime as datetime
 
 class createUser(BaseModel):
     """requirements for creating a user"""
+
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     userName: str = Field(
         ..., min_length=3, max_length=15, description="username of User"
@@ -30,12 +33,16 @@ class createUser(BaseModel):
 class loginUser(BaseModel):
     """requirements for logging in"""
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     userName: str = Field(..., description="user's username")
     password: str = Field(..., description="user's password")
 
 
 class readUser(BaseModel):
     """requirements for reading a user"""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     userId: Uuid = Field(..., description="ID of user")
     userEmail: str = Field(
@@ -57,6 +64,9 @@ class readUser(BaseModel):
 
 
 class createMessage(BaseModel):
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     senderId: Uuid = Field(..., description="ID of sender")
     recipientId: Uuid = Field(..., description="ID of recipient")
 
@@ -66,6 +76,9 @@ class createMessage(BaseModel):
 
 
 class sentMessage(BaseModel):
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     status_code: int = Field(..., description="HTTP Status Code of Message")
     senderId: Uuid = Field(..., description="ID of sender")
     messageText: str = Field(
@@ -76,6 +89,9 @@ class sentMessage(BaseModel):
 
 
 class readMessage(BaseModel):
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     messageId: Uuid = Field(..., description="ID of message")
     senderId: Uuid = Field(..., description="ID of sender")
     recipientId: Uuid = Field(..., description="ID of recipient")
@@ -91,6 +107,9 @@ class readMessage(BaseModel):
 
 
 class Conversation(BaseModel):
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     conversationId: Uuid = Field(..., description="ID of conversation")
     user1_Id: Uuid = Field(..., description="ID of first user")
     user2_Id: Uuid = Field(..., description="ID of second user")

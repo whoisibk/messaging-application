@@ -1,4 +1,5 @@
-from models import User, Uuid
+from models import User
+from uuid import UUID as Uuid
 from database import session
 from datetime import datetime
 
