@@ -54,7 +54,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 # JWT to be signed with this secret key using the HS256 algorithm
-SECRET_KEY = os.get_env("SECRET_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 # lifespan of access token in minutes
 ACCESS_TOKEN_EXPIRE_MINUTES = 30

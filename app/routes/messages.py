@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer
+from typing import List
 
 from services.message_ops import create_message
-from schemas import sentMessage, createMessage
+from schemas import sentMessage, createMessage, readMessage
 from services.message_ops import *
 from services.conversation_ops import *
 from utils.auth import create_jwt_token
-from users import get_current_user, User, Uuid
+from routes.users import get_current_user, User, Uuid
 
 router = APIRouter()
 
@@ -62,11 +63,11 @@ def send_message(
 # @router.get("/{}/conversations")
 
 
-@router.get("/messages/{conversationId}}", response_model=List[Message])
-def get_messages(conversationId: Uuid, user: User= Depends(get_current_user)) -> List[Message]:
+@router.get("/messages/{conversationId}}", response_model=List[readMessage])
+def get_messages(conversationId: Uuid, user: User= Depends(get_current_user)) -> List[readMessage]:
     """Retrieve messages sent by user within a conversation"""
 
-    messages: List[Message] = get_messagesInConversation_by_userId(userId=user.userId, conversationId=conversationId)
+    messages: List[readMessage] = get_messagesInConversation_by_userId(userId=user.userId, conversationId=conversationId)
     if not messages:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from schemas import Conversation as Conversation_
 
 from typing import List
 from services.conversation_ops import (
@@ -6,13 +7,13 @@ from services.conversation_ops import (
     Conversation,
     get_conversation_by_Id as get_convoId,
 )
-from users import get_current_user, User, Uuid
+from routes.users import get_current_user, User, Uuid
 
 router = APIRouter()
 
 
-@router.get("/conversations", response_model=List[Conversation])
-def get_conversations(user: User = Depends(get_current_user)) -> List[Conversation]:
+@router.get("/conversations", response_model=List[Conversation_])
+def get_conversations(user: User = Depends(get_current_user)) -> List[Conversation_]:
     """Retrieve all conversations a user has participated in"""
 
     conversations = conversations_for_user(user1_id=user.userId)
@@ -24,8 +25,8 @@ def get_conversations(user: User = Depends(get_current_user)) -> List[Conversati
     return conversations
 
 
-@router.get("conversations/{conversationId}", response_model=Conversation)
-def get_conversation_by_Id(conversationId: Uuid) -> Conversation:
+@router.get("conversations/{conversationId}", response_model=Conversation_)
+def get_conversation_by_Id(conversationId: Uuid) -> Conversation_:
     """Retrieve conversation by ConversationId"""
 
     conversation = get_convoId(conversationId)
