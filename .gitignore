@@ -7,7 +7,7 @@ app/services/__pycache__
 app/utils/__pycache__
 
 alembic/__pycache__
-
+alembic/versions/__pycache__
 venv
 
 .env
