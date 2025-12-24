@@ -63,7 +63,7 @@ def send_message(
 # @router.get("/{}/conversations")
 
 
-@router.get("/messages/{conversationId}}", response_model=List[readMessage])
+@router.get("/{conversationId}", response_model=List[readMessage])
 def get_messages(conversationId: Uuid, user: User= Depends(get_current_user)) -> List[readMessage]:
     """Retrieve messages sent by user within a conversation"""
 

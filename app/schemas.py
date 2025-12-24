@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List
-from models import User, Message, Conversation, Uuid, DateTime as datetime
+from datetime import datetime
+from uuid import UUID as Uuid
 
 
 """""" """''PYDANTIC MODELS FOR USER  """ """""" """"""
