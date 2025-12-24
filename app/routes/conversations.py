@@ -12,7 +12,7 @@ from routes.users import get_current_user, User, Uuid
 router = APIRouter()
 
 
-@router.get("/conversations", response_model=List[Conversation_])
+@router.get("/get-conversations", response_model=List[Conversation_])
 def get_conversations(user: User = Depends(get_current_user)) -> List[Conversation_]:
     """Retrieve all conversations a user has participated in"""
 
@@ -25,7 +25,7 @@ def get_conversations(user: User = Depends(get_current_user)) -> List[Conversati
     return conversations
 
 
-@router.get("conversations/{conversationId}", response_model=Conversation_)
+@router.get("/{conversationId}", response_model=Conversation_)
 def get_conversation_by_Id(conversationId: Uuid) -> Conversation_:
     """Retrieve conversation by ConversationId"""
 
