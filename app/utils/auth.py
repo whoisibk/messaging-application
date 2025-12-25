@@ -4,15 +4,15 @@ import os
 
 import bcrypt
 
-'''
+"""
 Python implementation of the JOSE (JavaScript Object Signing and Encryption) standard. 
 It provides support for JWT (JSON Web Token) handling.from jose import jwt, JWTError 
-'''
+"""
 from jose import jwt, JWTError
 
 
-
 load_dotenv()
+
 
 def hash_password(password: str) -> str:
     """
@@ -68,7 +68,7 @@ def create_jwt_token(data: dict) -> str:
 
     Returns:
         str: encoded JWT token
-    
+
     Notes:
         - Token is signed using HS256 algorithm and SECRET_KEY.
         - Token expires after ACCESS_TOKEN_EXPIRE_MINUTES.
@@ -79,8 +79,8 @@ def create_jwt_token(data: dict) -> str:
 
     to_encode = data.copy()
     expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode['exp'] = expire
-    encoded_jwt = jwt.encode(payload=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
+    to_encode["exp"] = expire
+    encoded_jwt = jwt.encode(claims=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
 
     return encoded_jwt
 
@@ -91,11 +91,10 @@ def decode_jwt_token(token: str) -> dict:
     Args:
         token(str): JWT token to be decoded
 
-    """""
+    """ ""
     try:
         payload = jwt.decode(jwt=token, algorithms=ALGORITHM, key=SECRET_KEY)
-        return payload.get('userName')
+        return payload.get("userName")
     except JWTError:
         print("Invalid Token or Expired Token")
         return None
-
