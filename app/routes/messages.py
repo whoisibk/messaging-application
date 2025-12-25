@@ -25,11 +25,11 @@ def send_message(
 
     Return:
         (sentMessage)
-            status_code: int 
+            status_code: int
             senderId: Uuid
-            messageText: str 
-            timestamp: datetime 
-            conversationId: Uuid 
+            messageText: str
+            timestamp: datetime
+            conversationId: Uuid
     """
 
     """extracts convoId if not none, else create and then extract"""
@@ -60,14 +60,19 @@ def send_message(
 
     # realtime convo will be integrated later during websockets
 
+
 # @router.get("/{}/conversations")
 
 
 @router.get("/{conversationId}", response_model=List[readMessage])
-def get_messages(conversationId: Uuid, user: User= Depends(get_current_user)) -> List[readMessage]:
+def get_messages(
+    conversationId: Uuid, user: User = Depends(get_current_user)
+) -> List[readMessage]:
     """Retrieve messages sent by user within a conversation"""
 
-    messages: List[readMessage] = get_messagesInConversation_by_userId(userId=user.userId, conversationId=conversationId)
+    messages: List[readMessage] = get_messagesInConversation_by_userId(
+        userId=user.userId, conversationId=conversationId
+    )
     if not messages:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

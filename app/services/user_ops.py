@@ -29,7 +29,7 @@ def create_user(
 
 
 def get_user_by_userName(userName) -> User:
-    """ Retrieve a user from the database by userName"""
+    """Retrieve a user from the database by userName"""
 
     db_session = session
     user: User = db_session.query(User).filter(User.userName == userName).first()

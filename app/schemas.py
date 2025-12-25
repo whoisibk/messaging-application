@@ -10,7 +10,6 @@ from uuid import UUID as Uuid
 class createUser(BaseModel):
     """requirements for creating a user"""
 
-
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     userName: str = Field(
