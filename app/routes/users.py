@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import (
     OAuth2PasswordBearer,
     OAuth2PasswordRequestForm,
-    HTTPBearer,
     HTTPAuthorizationCredentials,
 )
 
@@ -35,6 +34,9 @@ def signup(user: createUser) -> User:
     return get_user_by_userName(new_user.userName)
 
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+
+
 @router.post("/login", response_model=dict)
 def login(userLogin: OAuth2PasswordRequestForm = Depends()) -> dict:
     """
@@ -63,9 +65,6 @@ def login(userLogin: OAuth2PasswordRequestForm = Depends()) -> dict:
         )
     access_token = create_jwt_token(data={"userName": userName})
     return {"access_token": access_token, "token_type": "bearer"}
-
-
-oauth2_scheme = HTTPBearer()
 
 
 def get_current_user(
@@ -98,7 +97,7 @@ def get_current_user(
     return get_user_by_userName(userName)
 
 
-@router.get("/{users_id}", response_model=readUser)
+@router.get("/{user_id}", response_model=readUser)
 def get_user_profile(userId: Uuid) -> User:
     """
     Endpoint to get user profile by userId
