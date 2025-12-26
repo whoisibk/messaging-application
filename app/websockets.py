@@ -16,4 +16,4 @@ hostInfo = (HOST, PORT)
 
 
 while True:
-    server.accept(hostInfo)
+    serverSocket, address = server.accept(hostInfo)
