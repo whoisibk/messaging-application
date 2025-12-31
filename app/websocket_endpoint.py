@@ -1,6 +1,7 @@
 from fastapi import APIRouter, WebSocket, Depends
 
 from routes.users import get_current_user, User
+from routes.messages import save_message
 from websocket_manager import ConnectionManager
 from websockets import WebSocketException
 
@@ -19,6 +20,8 @@ async def websocket_endpoint(websocket: WebSocket, user: User = Depends(get_curr
             data = await websocket.receive_text()
             # parse json to dict
             data =  dict(data)
+
+            save_message(recipientId=data["recipientId"], messageText=data["message"], sender=user)
 
             # server forwards the message to the intended recipient
             await manager.send_personal_message(recipientId=data["recipientId"], message=data["message"])
