@@ -12,24 +12,24 @@ from routes.users import get_current_user, User, Uuid
 router = APIRouter()
 
 
-@router.post("/send_message", response_model=sentMessage)
-def send_message(
+@router.post("/save_message", response_model=sentMessage)
+def save_message(
     recipientId: Uuid, messageText: str, sender: User = Depends(get_current_user)
 ) -> sentMessage:
     """
-    Endpoint for sending a message from one user to another
+    Stores message in database before forwarding to recipient
     Args:
         recipientId (Uuid): ID of the message's recipient
         messageText(str)): message text content
         sender (User): User model of the message's sender
 
-    Return:
-        (sentMessage)
-            status_code: int
-            senderId: Uuid
-            messageText: str
-            timestamp: datetime
-            conversationId: Uuid
+    # Return:
+    #     (sentMessage)
+    #         status_code: int
+    #         senderId: Uuid
+    #         messageText: str
+    #         timestamp: datetime
+    #         conversationId: Uuid
     """
 
     """extracts convoId if not none, else create and then extract"""
