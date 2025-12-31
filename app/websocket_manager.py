@@ -53,7 +53,9 @@ class ConnectionManager:
         if recipientId in self.active_connections:
             await self.active_connections[recipientId].send_text(message)
         else:
-            raise ValueError(f"User with ID {recipientId} not connected.")
+            # will attend to this later
+            pass
+            
 
     async def broadcast(self, message: str):
         """
@@ -66,7 +68,7 @@ class ConnectionManager:
             None
         """
         for connection in self.active_connections:
-            self.active_connections[connection].send_text(message)
+            await self.active_connections[connection].send_text(message)
 
     def is_connected(self, userId: Uuid) -> bool:
         """
