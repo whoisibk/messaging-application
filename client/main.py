@@ -17,8 +17,6 @@ def main():
 
     match option:
         case 1:
-            userName= input("Username: ")
-            password = input("Password: ")
+            Login()
 
-            Login(userName, password)
-
+            
