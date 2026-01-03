@@ -2,7 +2,7 @@ import httpx
 import os
 from dotenv import load_dotenv
 
-from token_storage import load_token
+from client.token_storage import load_token
 
 load_dotenv()
 

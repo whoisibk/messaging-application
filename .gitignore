@@ -8,6 +8,8 @@ app/utils/__pycache__
 
 alembic/__pycache__
 alembic/versions/__pycache__
-venv
 
+client/__pycache__
+
+venv
 .env
