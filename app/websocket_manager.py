@@ -55,7 +55,6 @@ class ConnectionManager:
         else:
             # will attend to this later
             pass
-            
 
     async def broadcast(self, message: str):
         """

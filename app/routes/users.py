@@ -96,6 +96,7 @@ def get_current_user(
         )
     return get_user_by_userName(userName)
 
+
 @router.get("/profile/me", response_model=readUser)
 def get_my_profile(current_user: User = Depends(get_current_user)) -> User:
     """
