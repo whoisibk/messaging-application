@@ -85,15 +85,15 @@ def create_jwt_token(data: dict) -> str:
     return encoded_jwt
 
 
-def decode_jwt_token(token: str) -> dict:
+def decode_jwt_token(token: str) -> dict | None:
     """"
-        Decodes a JWT token to retrieve userId
+        Decodes a JWT token to retrieve username
     Args:
         token(str): JWT token to be decoded
 
     """ ""
     try:
-        payload = jwt.decode(jwt=token, algorithms=ALGORITHM, key=SECRET_KEY)
+        payload: dict = jwt.decode(jwt=token, algorithms=ALGORITHM, key=SECRET_KEY)
         return payload.get("userName")
     except JWTError:
         print("Invalid Token or Expired Token")

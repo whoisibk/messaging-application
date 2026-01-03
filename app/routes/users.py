@@ -96,11 +96,22 @@ def get_current_user(
         )
     return get_user_by_userName(userName)
 
+@router.get("/profile/me", response_model=readUser)
+def get_my_profile(current_user: User = Depends(get_current_user)) -> User:
+    """
+    Endpoint to get the profile of the currently authenticated user
+    Args:
+        current_user (User): The currently authenticated user, injected via dependency
+    Returns:
+        User: Details of the current user
+    """
+    return current_user
 
-@router.get("/{user_id}", response_model=readUser)
+
+@router.get("profile/{user_id}", response_model=readUser)
 def get_user_profile(userId: Uuid) -> User:
     """
-    Endpoint to get user profile by userId
+    Endpoint to get a user's profile by userId
     Args:
         userId (Uuid): ID of the user
     Returns:
