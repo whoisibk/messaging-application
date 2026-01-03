@@ -16,3 +16,8 @@ def load_token()-> dict | None:
     if TOKEN_PATH.exists() is None:
         return None
     return json.loads(TOKEN_PATH.read_text())
+
+def delete_token():
+    """Deletes the stored token data file"""
+    if TOKEN_PATH.exists():
+        TOKEN_PATH.unlink()
