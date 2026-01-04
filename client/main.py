@@ -1,30 +1,28 @@
-from auth import Login, Logout
-from token_storage import load_token
-from api import get_my_profile
+from client.auth import Login, Logout
+from client.token_storage import load_token
+from client.api import get_my_profile
 
 from app.utils.auth import decode_jwt_token
-
 
 def main():
 
     # If no token, prompt user to login or sign up
     if not load_token():
-        print("Welcome to ChatCLI 👋 \n")
+        print("\n\n\t\t-----------------Welcome to ChatCLI 👋 -----------------\n")
 
         print("1. Login")
         print("2. Sign Up")
         print("3. Exit")
 
         try:
-            option = int(input("Select an option: "))
+            option = int(input("\nSelect an option: "))
+            print()
         except ValueError:
             print("Enter a valid option")
-
 
         match option:
             case 1:
                 Login()
-
 
     else:
         # User is logged in
@@ -37,14 +35,20 @@ def main():
         print("3. View messages")
         print("4. View conversations")
         print("5. Logout")
-            
+
         try:
-            option = int(input("Select an option: "))
+            option = int(input("\nSelect an option: "))
+            print()
+
         except ValueError:
             print("Enter a valid option")
-        
+
         match option:
             case 1:
-                get_my_profile()
+                print(get_my_profile())
             case 5:
                 Logout()
+
+
+if __name__ == "__main__":
+    main()

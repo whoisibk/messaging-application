@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends, status
+
 from fastapi.security import (
     OAuth2PasswordBearer,
     OAuth2PasswordRequestForm,
     HTTPAuthorizationCredentials,
 )
-
 from schemas import createUser, readUser, loginUser
 from services.user_ops import *
 from utils.auth import *
@@ -95,6 +95,7 @@ def get_current_user(
             detail="Invalid or Expired Token",
         )
     return get_user_by_userName(userName)
+
 
 @router.get("/profile/me", response_model=readUser)
 def get_my_profile(current_user: User = Depends(get_current_user)) -> User:
