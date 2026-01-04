@@ -5,7 +5,6 @@ from fastapi.security import (
     OAuth2PasswordRequestForm,
     HTTPAuthorizationCredentials,
 )
-
 from schemas import createUser, readUser, loginUser
 from services.user_ops import *
 from utils.auth import *
