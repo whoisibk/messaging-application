@@ -10,6 +10,7 @@ alembic/__pycache__
 alembic/versions/__pycache__
 
 client/__pycache__
+client/mytoken.json
 
 venv
 .env

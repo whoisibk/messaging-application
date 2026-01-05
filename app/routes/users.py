@@ -55,15 +55,15 @@ def login(userLogin: OAuth2PasswordRequestForm = Depends()) -> dict:
     Raises:
         HTTPException: 401 error if authentication fails.
     """
-    userName, passwordhash = userLogin.username, hash_password(userLogin.password)
+    username, password = userLogin.username, hash_password(userLogin.password)
 
-    if not verify_password(userName, passwordhash):
+    if not verify_password(username, password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = create_jwt_token(data={"userName": userName})
+    access_token = create_jwt_token(data={"usern=ame": username})
     return {"access_token": access_token, "token_type": "bearer"}
 
 

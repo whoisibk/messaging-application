@@ -17,7 +17,7 @@ def Login():
     userName = input("Username: ")
     password = input("Password: ")
 
-    data = {"userName": userName, "password": password}
+    data = {"username": userName, "password": password}
 
     # Make a POST request (username and password) to the user login endpoint
     response = httpx.post(url=f"{API_BASE_URL}/users/login", data=data)
@@ -31,9 +31,9 @@ def Login():
     # Save the token to a file
     save_token(token_data)
 
-    username = decode_jwt_token(load_token().get("access_token"))
+    # username = decode_jwt_token(load_token().get("access_token"))
 
-    return f"Logged in as {userName}"
+    return f"\n\t\t\tLogged in as {userName}."
 
 
 def Logout():
@@ -41,3 +41,26 @@ def Logout():
     delete_token()
 
     return "Logged out successfully"
+
+
+def SignUp():
+    """Signs a new user up and makes a POST request"""
+    firstName = input("First Name: ").strip()
+    lastName = input("Last Name: ").strip()
+
+    userName = input("Type in preferred username: ").strip()
+    userEmail = input("Type in your email address: ").strip()
+
+    password = input("Create a password: ")
+
+    payload = {
+            "firstName": firstName.title(),
+            "lastName": lastName.title(),
+            "userName": userName,
+            "userEmail": userEmail.lower(),
+            "password": password
+    }
+
+    response = httpx.post(f"{API_BASE_URL}/users/signup", json=payload)
+
+    return f"\n\t\t\tSigned Up Successfully\nProceed to Login: "
