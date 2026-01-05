@@ -22,11 +22,11 @@ def main():
 
         match option:
             case 1:
-                Login()
+                print(Login())
 
     else:
         # User is logged in
-        username = decode_jwt_token(load_token().get("access_token"))
+        username = decode_jwt_token(dict(load_token()).get("access_token"))
 
         print(f"Welcome back, {username} 👋 \n")
 
@@ -51,4 +51,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  
