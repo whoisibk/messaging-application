@@ -41,3 +41,26 @@ def Logout():
     delete_token()
 
     return "Logged out successfully"
+
+
+def SignUp():
+    """Signs a new user up and makes a POST request"""
+    firstName = input("First Name: ").strip()
+    lastName = input("Last Name: ").strip()
+
+    userName = input("Type in preferred username: ").strip()
+    userEmail = input("Type in your email address: ").strip()
+
+    password = input("Create a password: ")
+
+    payload = {
+            "firstName": firstName.title(),
+            "lastName": lastName.title(),
+            "userName": userName,
+            "userEmail": userEmail.lower(),
+            "password": password
+    }
+
+    response = httpx.post(f"{API_BASE_URL}/users/signup", json=payload)
+
+    return f"\n\t\t\tSigned Up Successfully\nProceed to Login: "
