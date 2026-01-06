@@ -33,7 +33,7 @@ def Login():
 
     # username = decode_jwt_token(load_token().get("access_token"))
 
-    return f"\n\t\t\tLogged in as {userName}."
+    return userName
 
 
 def Logout():
