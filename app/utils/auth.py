@@ -96,5 +96,5 @@ def decode_jwt_token(token: str) -> str | None:
         payload: dict = jwt.decode(token=token, algorithms=ALGORITHM, key=SECRET_KEY)
         return payload.get("username")
     except JWTError:
-        print("Invalid Token or Expired Token")
+        # print("Invalid Token or Expired Token")
         return None

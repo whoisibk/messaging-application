@@ -7,15 +7,20 @@ from client.api import get_my_profile
 from app.utils.auth import decode_jwt_token
 
 def main():
-    if not load_token():
-        # If no token, prompt user to login or sign up 
+    # returns None if token expires
+    username = decode_jwt_token(dict(load_token()).get("access_token"))
+
+    if not load_token() or username is None:
+        # If no token or , prompt user to login or sign up 
         user_not_logged_in()
+        
 
         # After login/signup, run user_logged_in function
-        user_logged_in()
+
+        user_logged_in(username_)
     else:
         # User is already logged in
-        user_logged_in()
+        user_logged_in(username)
         
 
 def user_not_logged_in():
@@ -35,23 +40,26 @@ def user_not_logged_in():
 
     match option:
         case 1:
-            # if the user is logged out 
-            print(Login())
+            # if the user is logged out
+            global username_
+            username_ = Login()
+            print(f"\n\t\t\t\tLogged in as {username_}")
 
         case 2:
             # new user sign up 
             print(SignUp())
-            print(Login())
 
+            username_ = Login()
+            print(f"\n\t\t\t\tLogged in as {username_}")
+            
         case 3:
             exit("The application has been closed.")
 
-def user_logged_in():
+def user_logged_in(username):
     """Function to handle user who is logged in"""
 
-    username = decode_jwt_token(dict(load_token()).get("access_token"))
 
-    print(f"Welcome back, {username} 👋 \n")
+    print(f"\nWelcome back, {username} 👋 \n")
 
     print("1. View my profile")
     print("2. Send a message")
