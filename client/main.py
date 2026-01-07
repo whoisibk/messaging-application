@@ -7,17 +7,16 @@ from client.api import get_my_profile
 from app.utils.auth import decode_jwt_token
 
 def main():
-    # returns None if token expires
+    # returns None if token expires, else returns the username
     username = decode_jwt_token(dict(load_token()).get("access_token"))
 
     if not load_token() or username is None:
         # If no token or , prompt user to login or sign up 
         user_not_logged_in()
-        
 
         # After login/signup, run user_logged_in function
-
         user_logged_in(username_)
+    
     else:
         # User is already logged in
         user_logged_in(username)
@@ -55,6 +54,9 @@ def user_not_logged_in():
         case 3:
             exit("The application has been closed.")
 
+        case _:
+            print("Enter a valid option")
+
 def user_logged_in(username):
     """Function to handle user who is logged in"""
 
@@ -76,10 +78,10 @@ def user_logged_in(username):
 
     match option:
         case 1:
-            print(get_my_profile())
+            # get my profile
+            get_my_profile()
         case 5:
             Logout()
-
 
 
 if __name__ == "__main__":
