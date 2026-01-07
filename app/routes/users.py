@@ -34,7 +34,7 @@ def signup(user: createUser) -> User:
     return get_user_by_userName(new_user.userName)
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 
 @router.post("/login", response_model=dict)
@@ -63,22 +63,22 @@ def login(userLogin: OAuth2PasswordRequestForm = Depends()) -> dict:
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = create_jwt_token(data={"usern=ame": username})
+    access_token = create_jwt_token(data={"username": username})
     return {"access_token": access_token, "token_type": "bearer"}
 
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme),
+    token: str = Depends(oauth2_scheme),
 ) -> User:
-    """
+    """    
     Retrieve the current authenticated user's details.
 
     This function extracts the JWT token from the HTTP Authorization header,
     decodes it to obtain the username, and returns the corresponding user object.
 
     Args:
-        credentials (HTTPAuthorizationCredentials): The HTTP Authorization credentials
-            containing the JWT token, injected via the oauth2_scheme dependency.
+        token (str): The JWT token from the Authorization header,
+            injected via the oauth2_scheme dependency.
 
     Returns:
         User: The user object containing details of the currently authenticated user.
@@ -87,8 +87,7 @@ def get_current_user(
         HTTPException: With status code 401 UNAUTHORIZED if the token is invalid,
             expired, or does not contain a valid userName claim.
     """
-    token = credentials.credentials
-    userName = decode_jwt_token(token).get("userName")
+    userName = decode_jwt_token(token)
     if not userName:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -109,7 +108,7 @@ def get_my_profile(current_user: User = Depends(get_current_user)) -> User:
     return current_user
 
 
-@router.get("profile/{user_id}", response_model=readUser)
+@router.get("/profile/{user_id}", response_model=readUser)
 def get_user_profile(userId: Uuid) -> User:
     """
     Endpoint to get a user's profile by userId

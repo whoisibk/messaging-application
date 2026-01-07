@@ -6,6 +6,9 @@ from client.token_storage import load_token
 
 load_dotenv()
 
+"""API interaction functions for user authentication and profile management."""
+
+
 API_BASE_URL = os.getenv("API_BASE_URL")
 
 
@@ -17,9 +20,14 @@ def auth_headers():
 
 
 def get_my_profile():
-
+    """Fetch the profile of the currently authenticated user."""
     response = httpx.get(url=f"{API_BASE_URL}/users/profile/me", headers=auth_headers())
-    return response.json()
+    
+    response.raise_for_status()
+
+    # Print user profile details
+    for title, data in response.json().items():
+        print(f"{title}: {data}") 
 
 
 def get_messages():
