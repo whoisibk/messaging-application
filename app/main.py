@@ -4,11 +4,11 @@ from typing import Optional
 from enum import Enum
 from pydantic import BaseModel, Field
 
-from routes.users import router as users_route
-from routes.messages import router as messages_route
-from routes.conversations import router as conversations_route
+from app.routes.users import router as users_route
+from app.routes.messages import router as messages_route
+from app.routes.conversations import router as conversations_route
 
-from websocket_endpoint import wb_route as websocket_route
+from app.websocket_endpoint import wb_route as websocket_route
 
 
 app = FastAPI()

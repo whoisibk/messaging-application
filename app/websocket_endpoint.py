@@ -1,15 +1,14 @@
 from fastapi import APIRouter, WebSocket, Depends
 
-from routes.users import get_current_user, User
-from routes.messages import save_message
-from websocket_manager import ConnectionManager
+from app.routes.users import get_current_user, User
+from app.websocket_manager import ConnectionManager
 from websockets import WebSocketException
 
 wb_route = APIRouter()
 manager = ConnectionManager()
 
 
-@wb_route.websocket("/")
+@wb_route.websocket("/chat")
 async def websocket_endpoint(
     websocket: WebSocket, user: User = Depends(get_current_user)
 ):
@@ -19,20 +18,20 @@ async def websocket_endpoint(
 
     try:
         while True:
+
             # server receives message info from client in JSON format
-            data = await websocket.receive_text()
-            # parse json to dict
-            data = dict(data)
+            data = await websocket.receive_json()
 
-            save_message(
-                recipientId=data["recipientId"],
-                messageText=data["message"],
-                sender=user,
-            )
+            data = dict(data)  # parse to dict
 
-            # server forwards the message to the intended recipient
+            recipientId = data.get("recipientId")
+            message = data.get("message")
+
+            # send personal message to recipient
             await manager.send_personal_message(
-                recipientId=data["recipientId"], message=data["message"]
+                senderId=userId,
+                recipientId=recipientId,
+                message=message,
             )
 
     except WebSocketException:

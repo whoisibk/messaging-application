@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from schemas import Conversation as Conversation_
+from app.schemas import Conversation as Conversation_
 
 from typing import List
-from services.conversation_ops import (
+from app.services.conversation_ops import (
     conversations_for_user,
     Conversation,
     get_conversation_by_Id as get_convoId,
 )
-from routes.users import get_current_user, User, Uuid
+from app.routes.users import get_current_user, User, Uuid
 
 router = APIRouter()
 

@@ -1,13 +1,13 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, WebSocket
 
 from fastapi.security import (
     OAuth2PasswordBearer,
     OAuth2PasswordRequestForm,
     HTTPAuthorizationCredentials,
 )
-from schemas import createUser, readUser, loginUser
-from services.user_ops import *
-from utils.auth import *
+from app.schemas import createUser, readUser, loginUser
+from app.services.user_ops import *
+from app.utils.auth import *
 
 router = APIRouter()
 
@@ -70,7 +70,7 @@ def login(userLogin: OAuth2PasswordRequestForm = Depends()) -> dict:
 def get_current_user(
     token: str = Depends(oauth2_scheme),
 ) -> User:
-    """    
+    """
     Retrieve the current authenticated user's details.
 
     This function extracts the JWT token from the HTTP Authorization header,
@@ -87,6 +87,28 @@ def get_current_user(
         HTTPException: With status code 401 UNAUTHORIZED if the token is invalid,
             expired, or does not contain a valid userName claim.
     """
+    userName = decode_jwt_token(token)
+    if not userName:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or Expired Token",
+        )
+    return get_user_by_userName(userName)
+
+
+def get_current_user_ws(websocket: WebSocket) -> User:
+    """
+    Retrieve current user for WebSocket connections using the Authorization header.
+
+    Expects header: Authorization: Bearer <token>
+    """
+    auth_header = websocket.headers.get("Authorization")
+    if not auth_header or not auth_header.lower().startswith("bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing or invalid Authorization header",
+        )
+    token = auth_header.split(" ", 1)[1]
     userName = decode_jwt_token(token)
     if not userName:
         raise HTTPException(

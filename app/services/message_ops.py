@@ -1,8 +1,8 @@
 from typing import List  # import List type hint
-from models import Conversation, Uuid, Message
 from datetime import datetime
-from database import session
 
+from app.database import session
+from app.models import Conversation, Uuid, Message
 
 """    Service functions for message operations    """
 

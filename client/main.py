@@ -2,7 +2,7 @@ from sys import exit
 
 from client.auth import SignUp, Login, Logout
 from client.token_storage import load_token
-from client.api import get_my_profile
+from client.api import get_my_profile, send_message
 
 from app.utils.auth import decode_jwt_token
 
@@ -80,6 +80,9 @@ def user_logged_in(username):
         case 1:
             # get my profile
             get_my_profile()
+        case 2:
+            # send a message
+            send_message()
         case 5:
             Logout()
 

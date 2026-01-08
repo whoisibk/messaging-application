@@ -2,26 +2,24 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer
 from typing import List
 
-from services.message_ops import create_message
-from schemas import sentMessage, createMessage, readMessage
-from services.message_ops import *
-from services.conversation_ops import *
-from utils.auth import create_jwt_token
-from routes.users import get_current_user, User, Uuid
+from app.services.message_ops import create_message
+from app.schemas import sentMessage, createMessage, readMessage
+from app.services.message_ops import *
+from app.services.conversation_ops import *
+from app.utils.auth import create_jwt_token
+from app.routes.users import get_current_user, User, Uuid
 
 router = APIRouter()
 
 
-@router.post("/save_message", response_model=sentMessage)
-def save_message(
-    recipientId: Uuid, messageText: str, sender: User = Depends(get_current_user)
-) -> sentMessage:
+# @router.post("/save_message", response_model=sentMessage)
+def save_message(recipientId: Uuid, messageText: str, senderId: Uuid) -> sentMessage:
     """
     Stores message in database before forwarding to recipient
     Args:
         recipientId (Uuid): ID of the message's recipient
         messageText(str)): message text content
-        sender (User): User model of the message's sender
+        senderId (Uuid): ID of the message's sender
 
     # Return:
     #     (sentMessage)
@@ -33,19 +31,19 @@ def save_message(
     """
 
     """extracts convoId if not none, else create and then extract"""
-    get_conv = get_conversation_between_users()
+    get_conv = get_conversationId_between_users(user1_Id=senderId, user2_Id=recipientId)
     if get_conv is None:
         conversationId = create_conversation(
-            user1_Id=sender.userId, user2_id=recipientId
+            user1_Id=senderId, user2_id=recipientId
         ).conversationId
     else:
         conversationId = get_conv.conversationId
 
     """ saves message to the database so it can be fetched later """
     message_info = create_message(
+        senderId=senderId,
         recipientId=recipientId,
         messageText=messageText,
-        senderId=sender.userId,
         timestamp=datetime.now(),
         conversationId=conversationId,
     )
