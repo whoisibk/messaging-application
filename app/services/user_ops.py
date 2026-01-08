@@ -1,6 +1,6 @@
-from models import User
+from app.models import User
 from uuid import UUID as Uuid
-from database import session
+from app.database import session
 from datetime import datetime
 
 
@@ -41,6 +41,14 @@ def get_user_by_Id(userId: Uuid) -> User:
     db_session = session
     user: User = db_session.query(User).filter(User.userId == userId).first()
     return user if user else None
+
+
+def get_userId_by_userName(userName) -> Uuid:
+    """Retrieve userId using userName"""
+    db_session = session
+
+    user: User = db_session.query(User).filter(User.userName == userName).first()
+    return user.userId if user else None
 
 
 def verify_user_credentials(userName, passwordHash: str) -> bool:

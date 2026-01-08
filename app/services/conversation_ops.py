@@ -1,5 +1,5 @@
-from models import Conversation, Uuid
-from database import session
+from app.models import Conversation, Uuid
+from app.database import session
 from typing import List
 
 
@@ -27,14 +27,11 @@ def get_conversation_by_Id(conversationId: Uuid) -> Conversation:
     return conversation
 
 
-def get_conversation_between_users(
-    conversationId: Uuid, user1_Id: Uuid, user2_Id: Uuid
-) -> Conversation:
+def get_conversationId_between_users(user1_Id: Uuid, user2_Id: Uuid) -> Conversation:
     db_session = session
     conversation = (
         db_session.query(Conversation)
         .filter(
-            Conversation.conversationId == conversationId,
             Conversation.user1_Id == user1_Id,
             Conversation.user2_Id == user2_Id,
         )
@@ -42,7 +39,7 @@ def get_conversation_between_users(
     )
     db_session.commit()
 
-    return conversation
+    return conversation.conversationId if conversation else None
 
 
 def conversations_for_user(user1_id: Uuid) -> List[Conversation]:

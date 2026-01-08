@@ -3,6 +3,8 @@ import os
 from dotenv import load_dotenv
 
 from client.token_storage import load_token
+from app.services.user_ops import get_userId_by_userName
+
 
 load_dotenv()
 
@@ -44,6 +46,24 @@ def save_messages():
         url=f"{API_BASE_URL}/messages/save_message", headers=auth_headers()
     )
     return response.json()
+
+
+def send_message():
+    """Send a message to a specified recipient."""
+
+    recipient = input("Enter recipient username: ").strip()
+    message = input("Enter your message: ").strip()
+    
+    recipientId = get_userId_by_userName(recipient)
+
+    data = {
+        # UUIDs need to be converted to strings for JSON serialization
+        "recipientId": str(recipientId),
+        "message": message,
+    }
+
+    response = httpx.post(f"{API_BASE_URL}/ws/chat", json=data, headers=auth_headers())
+    print(response)
 
 
 def conversations():

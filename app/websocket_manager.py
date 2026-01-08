@@ -1,6 +1,8 @@
 from fastapi import WebSocket
 from uuid import UUID as Uuid
 
+from app.routes.messages import save_message
+
 
 class ConnectionManager:
     """Manages WebSocket connections for real-time communication."""
@@ -38,10 +40,13 @@ class ConnectionManager:
         else:
             raise ValueError(f"User with ID {userId} not connected")
 
-    async def send_personal_message(self, recipientId: Uuid, message: str):
+    async def send_personal_message(
+        self, senderId: Uuid, recipientId: Uuid, message: str
+    ):
         """
         Send a text message to a specific connected user.
         Args:
+            senderId (Uuid): The unique identifier of the sender user.
             recipientId (Uuid): The unique identifier of the recipient user.
             message (str): The text message to send.
         Returns:
@@ -50,11 +55,18 @@ class ConnectionManager:
             ValueError: If the recipient user with the specified ID is not currently connected.
 
         """
-        if recipientId in self.active_connections:
+
+        # initially save message to database
+        save_message(
+            senderId=senderId,
+            recipientId=recipientId,
+            messageText=message,
+        )
+
+        # if user is connected, push message immediately
+        # offline users will fetch from DB when they come online
+        if self.is_connected(recipientId):
             await self.active_connections[recipientId].send_text(message)
-        else:
-            # will attend to this later
-            pass
 
     async def broadcast(self, message: str):
         """
