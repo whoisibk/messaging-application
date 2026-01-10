@@ -42,6 +42,10 @@ async def receive_messages(websocket):
     # continuously listen for messages
     while True:
         message = await websocket.recv()
+     
+        # receive json from the server
+
+
         print(f"Received message: {message}")
 
 
@@ -56,7 +60,7 @@ async def send_message(websocket):
     while True:
         message = await input("Enter message to send: ")
         await websocket.send(message)
-        print(f"Sent message: {message}")
+        print(f"You: {message}")
 
 
 
