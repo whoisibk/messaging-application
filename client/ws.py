@@ -1,5 +1,5 @@
 import websockets, asyncio
-
+from fastapi import WebSocket
 
 """Client-side program to handle websocket connections for real-time messaging."""
 
@@ -36,7 +36,7 @@ def websocket_connection_handler(url: str):
     return connect    
 
 
-async def receive_messages(websocket):
+async def receive_messages(websocket: WebSocket):
     """Receive messages from the websocket server."""
 
     # continuously listen for messages
@@ -61,7 +61,4 @@ async def send_message(websocket):
         message = await input("Enter message to send: ")
         await websocket.send(message)
         print(f"You: {message}")
-
-
-
     
