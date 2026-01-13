@@ -2,10 +2,8 @@ import httpx
 import os
 from dotenv import load_dotenv
 
-from app.routes.users import get_current_user
 from client.token_storage import load_token
 from app.services.user_ops import get_userId_by_userName
-
 
 
 load_dotenv()

@@ -1,5 +1,4 @@
 from fastapi import APIRouter, WebSocket, Depends
-import json
 
 from app.routes.users import get_current_user, User
 from app.websocket_manager import ConnectionManager
@@ -21,17 +20,19 @@ async def websocket_endpoint(
         while True:
 
             # server receives message info from client in JSON format
-            # containing senderId, recipientId, message
             data = await websocket.receive_json()
 
-            # parse json data
-            data = json.loads(data)   
-            
-            # server forwards json message to the intended recipient
-            await manager.send_personal_message(
-                message_info=data
-            )
+            data = dict(data)  # parse to dict
 
+            recipientId = data.get("recipientId")
+            message = data.get("message")
+
+            # send personal message to recipient
+            await manager.send_personal_message(
+                senderId=userId,
+                recipientId=recipientId,
+                message=message,
+            )
 
     except WebSocketException:
         manager.disconnect(userId)
