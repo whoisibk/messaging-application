@@ -41,7 +41,7 @@ class ConnectionManager:
             raise ValueError(f"User with ID {userId} not connected")
 
     async def send_personal_message(
-        self, senderId: Uuid, recipientId: Uuid, message: str
+        self, message_info: dict
     ):
         """
         Send a text message to a specific connected user.
@@ -58,15 +58,17 @@ class ConnectionManager:
 
         # initially save message to database
         save_message(
-            senderId=senderId,
-            recipientId=recipientId,
-            messageText=message,
+            senderId=message_info.get("senderId"),
+            recipientId=message_info.get("recipientId"),
+            messageText=message_info.get("message"),
         )
 
         # if user is connected, push message immediately
         # offline users will fetch from DB when they come online
-        if self.is_connected(recipientId):
-            await self.active_connections[recipientId].send_text(message)
+        if self.is_connected(message_info.get("recipientId")):
+            await self.active_connections[message_info.get("recipientId")].send_json(
+                message_info, mode="text"
+            )
 
     async def broadcast(self, message: str):
         """

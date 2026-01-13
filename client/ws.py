@@ -1,5 +1,7 @@
+from uuid import UUID as Uuid
 import websockets, asyncio
 from fastapi import WebSocket
+import json
 
 """Client-side program to handle websocket connections for real-time messaging."""
 
@@ -37,20 +39,26 @@ def websocket_connection_handler(url: str):
 
 
 async def receive_messages(websocket: WebSocket):
-    """Receive messages from the websocket server."""
+    """Receive wrapped json from the websocket server and unwrap it."""
 
     # continuously listen for messages
     while True:
         message = await websocket.recv()
      
         # receive json from the server
+        try:
+            data = json.loads(message)
+            
+            print(f"{data['senderId']}: {data['message']}")
+
+        except json.JSONDecodeError:
+            print("Received non-JSON message")
+            
+        
 
 
-        print(f"Received message: {message}")
-
-
-async def send_message(websocket):
-    """Send a message to the websocket server.
+async def send_message(websocket:WebSocket, senderId: Uuid, recipientId: Uuid, message: str):
+    """Send message in json to the websocket server.
 
     Args:
         websocket: The websocket connection.
@@ -58,7 +66,14 @@ async def send_message(websocket):
     """
 
     while True:
+        
         message = await input("Enter message to send: ")
-        await websocket.send(message)
-        print(f"You: {message}")
+        
+        payload = json.dumps({
+            "senderId": str(senderId),
+            "recipientId": str(recipientId),
+            "message": message
+        })
+        await websocket.send(payload)
+        print(f"{senderId}: {message}")
     
