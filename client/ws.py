@@ -3,8 +3,8 @@ import websockets, asyncio
 from fastapi import WebSocket
 import json
 
-"""Client-side program to handle websocket connections for real-time messaging."""
 
+"""Client-side program to handle websocket connections for real-time messaging."""
 
 
 def websocket_connection_handler(url: str):
