@@ -8,9 +8,11 @@ from app.utils.auth import decode_jwt_token
 
 def main():
     # returns None if token expires, else returns the username
-    username = decode_jwt_token(dict(load_token()).get("access_token"))
 
-    if not load_token() or username is None:
+    # username = decode_jwt_token(dict(load_token()).get("access_token"))
+    load_token_  = load_token()
+
+    if not load_token_ or (username := decode_jwt_token(dict(load_token_).get("access_token"))) is None:
         # If no token or , prompt user to login or sign up 
         user_not_logged_in()
 
