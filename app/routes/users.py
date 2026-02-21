@@ -38,7 +38,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 
 @router.post("/login", response_model=dict)
-def login(userLogin: OAuth2PasswordRequestForm = Depends()) -> dict:
+def login(user_login: OAuth2PasswordRequestForm = Depends()):
     """
     Endpoint for user login.
 
@@ -46,7 +46,7 @@ def login(userLogin: OAuth2PasswordRequestForm = Depends()) -> dict:
     credentials to be sent as form data (URL-encoded) rather than JSON.
 
     Args:
-        form_data (OAuth2PasswordRequestForm): An object containing the
+        user_login (OAuth2PasswordRequestForm): An object containing the
             'username' and 'password' extracted from the request form.
 
     Returns:
@@ -55,14 +55,16 @@ def login(userLogin: OAuth2PasswordRequestForm = Depends()) -> dict:
     Raises:
         HTTPException: 401 error if authentication fails.
     """
-    username, password = userLogin.username, hash_password(userLogin.password)
-
-    if not verify_password(username, password):
+    username, password = user_login.username, user_login.password
+   
+    if not verify_user_credentials(username, password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Invalid credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+
     access_token = create_jwt_token(data={"username": username})
     return {"access_token": access_token, "token_type": "bearer"}
 
