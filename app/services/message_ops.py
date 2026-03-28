@@ -8,7 +8,7 @@ from app.models import Conversation, Uuid, Message
 
 
 def create_message(
-    senderId: Uuid, recipientId: Uuid, messageText, timestamp: datetime
+    senderId: Uuid, recipientId: Uuid, messageText, timestamp: datetime, conversationId: Uuid
 ) -> Message:
     """Create a new message and add to the database"""
     new_message: Message = Message(
@@ -16,6 +16,7 @@ def create_message(
         recipientId=recipientId,
         messageText=messageText,
         timestamp=timestamp,
+        conversationId=conversationId,
     )
     db_session = session
     db_session.add(new_message)

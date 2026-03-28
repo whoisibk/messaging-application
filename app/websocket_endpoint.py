@@ -15,7 +15,7 @@ async def websocket_endpoint(
 ):
 
     userId = user.userId
-    manager.connect(userId, websocket)
+    await manager.connect(userId, websocket)
 
     try:
         while True:

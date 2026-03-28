@@ -3,10 +3,10 @@ from app.database import session
 from typing import List
 
 
-def create_conversation(user1_Id: Uuid, user2_id: Uuid) -> Conversation:
+def create_conversation(user1_Id: Uuid, user2_Id: Uuid) -> Conversation:
     db_session = session
 
-    new_conversation = Conversation(user1_Id=user1_Id, user2_id=user2_id)
+    new_conversation = Conversation(user1_Id=user1_Id, user2_Id=user2_Id)
 
     db_session.add(new_conversation)
     db_session.commit()

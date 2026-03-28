@@ -132,7 +132,7 @@ def get_my_profile(current_user: User = Depends(get_current_user)) -> User:
     return current_user
 
 
-@router.get("/profile/{user_id}", response_model=readUser)
+@router.get("/profile/{userId}", response_model=readUser)
 def get_user_profile(userId: Uuid) -> User:
     """
     Endpoint to get a user's profile by userId
