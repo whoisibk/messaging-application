@@ -8,14 +8,18 @@ from app.models import Conversation, Uuid, Message
 
 
 def create_message(
-    senderId: Uuid, recipientId: Uuid, messageText, timestamp: datetime, conversationId: Uuid
+    senderId: Uuid,
+    recipientId: Uuid,
+    messageText: str,
+    timestamp: datetime,
+    conversationId: Uuid,
 ) -> Message:
     """Create a new message and add to the database"""
     new_message: Message = Message(
         senderId=senderId,
         recipientId=recipientId,
         messageText=messageText,
-        timestamp=timestamp,
+        timeStamp=timestamp,
         conversationId=conversationId,
     )
     db_session = session
@@ -42,8 +46,8 @@ def get_messages_by_conversation(conversationId: Uuid) -> List[Message]:
     """Retrieve messages by conversationId"""
     db_session = session
     messages: List[Message] = (
-        db_session.query(Conversation)
-        .filter(Conversation.conversationId == conversationId)
+        db_session.query(Message)
+        .filter(Message.conversationId == conversationId)
         .all()
     )
     db_session.commit()

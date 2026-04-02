@@ -1,38 +1,49 @@
-from fastapi import APIRouter, WebSocket, Depends
-import json
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
 
-from app.routes.users import get_current_user, User
+from app.routes.users import get_current_user_ws
 from app.websocket_manager import ConnectionManager
-from websockets import WebSocketException
 
 wb_route = APIRouter()
 manager = ConnectionManager()
 
 
 @wb_route.websocket("/chat")
-async def websocket_endpoint(
-    websocket: WebSocket, user: User = Depends(get_current_user)
-):
+async def websocket_endpoint(websocket: WebSocket):
+    try:
+        user = get_current_user_ws(websocket)
+    except HTTPException as error:
+        await websocket.close(code=1008, reason=error.detail)
+        return
 
     userId = user.userId
-    await manager.connect(userId, websocket)
+    await manager.connect(userId=userId, websocket=websocket)
 
     try:
         while True:
-
-            # server receives message info from client in JSON format
-            # containing senderId, recipientId, message
             data = await websocket.receive_json()
 
-            # parse json data
-            data = json.loads(data)   
+            if not isinstance(data, dict):
+                await websocket.send_json(
+                    {
+                        "event": "error",
+                        "detail": "Invalid payload. Expected a JSON object.",
+                    }
+                )
+                continue
 
-            
-            # server forwards json message to the intended recipient
-            await manager.send_personal_message(
-                message_info=data
-            )
+            try:
+                ack = await manager.process_incoming_message(
+                    senderId=userId,
+                    message_info=data,
+                )
+                await websocket.send_json({"event": "ack", "data": ack})
+            except ValueError as error:
+                await websocket.send_json(
+                    {
+                        "event": "error",
+                        "detail": str(error),
+                    }
+                )
 
-
-    except WebSocketException:
+    except WebSocketDisconnect:
         manager.disconnect(userId)

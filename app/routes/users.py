@@ -3,9 +3,8 @@ from fastapi import APIRouter, HTTPException, Depends, status, WebSocket
 from fastapi.security import (
     OAuth2PasswordBearer,
     OAuth2PasswordRequestForm,
-    HTTPAuthorizationCredentials,
 )
-from app.schemas import createUser, readUser, loginUser
+from app.schemas import createUser, readUser
 from app.services.user_ops import *
 from app.utils.auth import *
 
@@ -104,20 +103,34 @@ def get_current_user_ws(websocket: WebSocket) -> User:
 
     Expects header: Authorization: Bearer <token>
     """
-    auth_header = websocket.headers.get("Authorization")
-    if not auth_header or not auth_header.lower().startswith("bearer "):
+    token = websocket.query_params.get("token")
+
+    # Fallback for clients that send JWT in Authorization header.
+    if token is None:
+        auth_header = websocket.headers.get("Authorization")
+        if auth_header and auth_header.lower().startswith("bearer "):
+            token = auth_header.split(" ", 1)[1]
+
+    if token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing or invalid Authorization header",
+            detail="Missing token",
         )
-    token = auth_header.split(" ", 1)[1]
+
     userName = decode_jwt_token(token)
     if not userName:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or Expired Token",
         )
-    return get_user_by_userName(userName)
+
+    user = get_user_by_userName(userName)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+    return user
 
 
 @router.get("/profile/me", response_model=readUser)
@@ -142,3 +155,18 @@ def get_user_profile(userId: Uuid) -> User:
         User: Details of the user
     """
     return get_user_by_Id(userId)
+
+
+@router.get("/lookup/{userName}", response_model=readUser)
+def get_user_by_username_lookup(
+    userName: str,
+    current_user: User = Depends(get_current_user),
+) -> User:
+    """Retrieve user profile by username for recipient resolution."""
+    user = get_user_by_userName(userName)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    return user

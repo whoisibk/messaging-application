@@ -1,8 +1,10 @@
 from sys import exit
+import asyncio
 
 from client.auth import SignUp, Login, Logout
 from client.token_storage import load_token
-from client.api import get_my_profile, send_message
+from client.api import get_my_profile, get_websocket_url
+from client.ws import chat_session
 
 from app.utils.auth import decode_jwt_token
 
@@ -83,8 +85,9 @@ def user_logged_in(username):
             # get my profile
             get_my_profile()
         case 2:
-            # send a message
-            send_message()
+            # open realtime chat session
+            ws_url = get_websocket_url()
+            asyncio.run(chat_session(ws_url))
         case 5:
             Logout()
 

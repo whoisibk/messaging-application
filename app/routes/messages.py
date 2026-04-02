@@ -1,19 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import HTTPBearer
 from typing import List
+from datetime import datetime
+from uuid import UUID as Uuid
 
-from app.services.message_ops import create_message
-from app.schemas import sentMessage, createMessage, readMessage
+from app.schemas import readMessage
 from app.services.message_ops import *
 from app.services.conversation_ops import *
-from app.utils.auth import create_jwt_token
-from app.routes.users import get_current_user, User, Uuid
+from app.routes.users import get_current_user, User
+from app.services.user_ops import get_user_by_Id
 
 router = APIRouter()
 
 
 # @router.post("/save_message", response_model=sentMessage)
-def save_message(recipientId: Uuid, messageText: str, senderId: Uuid) -> sentMessage:
+def save_message(recipientId: Uuid, messageText: str, senderId: Uuid) -> dict:
     """
     Stores message in database before forwarding to recipient
     Args:
@@ -30,14 +30,24 @@ def save_message(recipientId: Uuid, messageText: str, senderId: Uuid) -> sentMes
     #         conversationId: Uuid
     """
 
-    """extracts convoId if not none, else create and then extract"""
-    get_conv = get_conversationId_between_users(user1_Id=senderId, user2_Id=recipientId)
-    if get_conv is None:
+    recipient = get_user_by_Id(recipientId)
+    if recipient is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recipient not found",
+        )
+
+    existing_conversation_id = get_conversationId_between_users(
+        user1_Id=senderId,
+        user2_Id=recipientId,
+    )
+    if existing_conversation_id is None:
         conversationId = create_conversation(
-            user1_Id=senderId, user2_id=recipientId
+            user1_Id=senderId,
+            user2_Id=recipientId,
         ).conversationId
     else:
-        conversationId = get_conv.conversationId
+        conversationId = existing_conversation_id
 
     """ saves message to the database so it can be fetched later """
     message_info = create_message(
@@ -49,11 +59,12 @@ def save_message(recipientId: Uuid, messageText: str, senderId: Uuid) -> sentMes
     )
 
     return {
-        "status": 200,
+        "messageId": str(message_info.messageId),
         "conversationId": message_info.conversationId,
-        "timestamp": message_info.timestamp,
+        "timestamp": message_info.timeStamp,
         "message": message_info.messageText,
-        "sent by": message_info.senderId,
+        "senderId": message_info.senderId,
+        "recipientId": message_info.recipientId,
     }
 
     # realtime convo will be integrated later during websockets
@@ -76,4 +87,14 @@ def get_messages(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Conversation not found",
         )
-    return messages
+    return [
+        {
+            "messageId": message.messageId,
+            "senderId": message.senderId,
+            "recipientId": message.recipientId,
+            "conversationId": message.conversationId,
+            "messageText": message.messageText,
+            "timestamp": message.timeStamp,
+        }
+        for message in messages
+    ]

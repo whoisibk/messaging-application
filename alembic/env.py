@@ -50,7 +50,7 @@ def run_migrations_offline() -> None:
     config.set_main_option("sqlalchemy.url", real_url)
     
     context.configure(
-        url=url,
+        url=real_url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},

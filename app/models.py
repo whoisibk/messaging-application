@@ -41,7 +41,6 @@ class Message(Base):
         Uuid(as_uuid=True),
         ForeignKey("user.userId", ondelete="CASCADE"),
         nullable=False,
-        unique=True,
     )
 
     # retrieve conversation (of which message is a part of) via conversationId
@@ -68,8 +67,8 @@ class Conversation(Base):
 
     # retrieve conversation participants via userId
     user1_Id = Column(
-        Uuid(as_uuid=True), ForeignKey("user.userId"), nullable=False, unique=True
+        Uuid(as_uuid=True), ForeignKey("user.userId"), nullable=False
     )
     user2_Id = Column(
-        Uuid(as_uuid=True), ForeignKey("user.userId"), nullable=False, unique=True
+        Uuid(as_uuid=True), ForeignKey("user.userId"), nullable=False
     )

@@ -37,12 +37,8 @@ class ConnectionManager:
         """
         if userId in self.active_connections:
             self.active_connections.pop(userId)
-        else:
-            raise ValueError(f"User with ID {userId} not connected")
 
-    async def send_personal_message(
-        self, message_info: dict
-    ):
+    async def process_incoming_message(self, senderId: Uuid, message_info: dict) -> dict:
         """
         Send a text message to a specific connected user.
         Args:
@@ -50,25 +46,58 @@ class ConnectionManager:
             recipientId (Uuid): The unique identifier of the recipient user.
             message (str): The text message to send.
         Returns:
-            None
+            Dict
         Raises:
             ValueError: If the recipient user with the specified ID is not currently connected.
 
         """
 
-        # initially save message to database
-        save_message(
-            senderId=message_info.get("senderId"),
-            recipientId=message_info.get("recipientId"),
-            messageText=message_info.get("message"),
+        recipientId_raw = message_info.get("recipientId")
+        message = message_info.get("message")
+
+        if recipientId_raw is None:
+            raise ValueError("Missing required field: recipientId")
+
+        if not isinstance(message, str) or not message.strip():
+            raise ValueError("Message must be a non-empty string")
+
+        try:
+            recipientId = Uuid(str(recipientId_raw))
+        except ValueError as error:
+            raise ValueError("recipientId must be a valid UUID") from error
+
+        message_record = save_message(
+            senderId=senderId,
+            recipientId=recipientId,
+            messageText=message.strip(),
         )
 
-        # if user is connected, push message immediately
-        # offline users will fetch from DB when they come online
-        if self.is_connected(message_info.get("recipientId")):
-            await self.active_connections[message_info.get("recipientId")].send_json(
-                message_info, mode="text"
+        outbound_message = {
+            "messageId": message_record["messageId"],
+            "conversationId": str(message_record["conversationId"]),
+            "senderId": str(message_record["senderId"]),
+            "recipientId": str(message_record["recipientId"]),
+            "message": message_record["message"],
+            "timestamp": message_record["timestamp"].isoformat(),
+        }
+
+        deliveryStatus = "stored_offline"
+        if self.is_connected(recipientId):
+            await self.active_connections[recipientId].send_json(
+                {
+                    "event": "message",
+                    "data": {
+                        **outbound_message,
+                        "deliveryStatus": "delivered",
+                    },
+                }
             )
+            deliveryStatus = "delivered"
+
+        return {
+            **outbound_message,
+            "deliveryStatus": deliveryStatus,
+        }
 
     async def broadcast(self, message: str):
         """
