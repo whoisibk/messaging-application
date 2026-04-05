@@ -3,6 +3,7 @@ from datetime import datetime
 
 from app.database import session
 from app.models import Conversation, Uuid, Message
+from app.services.conversation_ops import update_last_message
 
 """    Service functions for message operations    """
 
@@ -25,6 +26,8 @@ def create_message(
     db_session = session
     db_session.add(new_message)
     db_session.commit()
+
+    update_last_message(conversationId, messageText)
 
     return new_message
 

@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+sqlalchemy
+alembic
+psycopg2-binary
+python-dotenv
+bcrypt
+python-jose[cryptography]
+httpx
+websockets

@@ -72,3 +72,6 @@ class Conversation(Base):
     user2_Id = Column(
         Uuid(as_uuid=True), ForeignKey("user.userId"), nullable=False
     )
+
+    dateCreated = Column(DateTime, nullable=True)
+    lastMessage = Column(String(250), nullable=True)

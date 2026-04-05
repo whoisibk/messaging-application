@@ -2,6 +2,7 @@ from app.models import Conversation, Uuid
 from app.database import session
 from typing import List
 from sqlalchemy import and_, or_
+from datetime import datetime
 
 
 def _normalize_participants(user1_Id: Uuid, user2_Id: Uuid) -> tuple[Uuid, Uuid]:
@@ -14,7 +15,7 @@ def create_conversation(user1_Id: Uuid, user2_Id: Uuid) -> Conversation:
 
     user1_Id, user2_Id = _normalize_participants(user1_Id, user2_Id)
 
-    new_conversation = Conversation(user1_Id=user1_Id, user2_Id=user2_Id)
+    new_conversation = Conversation(user1_Id=user1_Id, user2_Id=user2_Id, dateCreated=datetime.now())
 
     db_session.add(new_conversation)
     db_session.commit()
@@ -67,6 +68,14 @@ def conversations_for_user(user1_id: Uuid) -> List[Conversation]:
     db_session.commit()
 
     return conversations
+
+
+def update_last_message(conversationId: Uuid, messageText: str) -> None:
+    db_session = session
+    db_session.query(Conversation).filter(
+        Conversation.conversationId == conversationId
+    ).update({"lastMessage": messageText})
+    db_session.commit()
 
 
 def delete_conversation(conversationId: Uuid) -> bool:

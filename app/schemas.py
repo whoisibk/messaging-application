@@ -113,7 +113,5 @@ class Conversation(BaseModel):
     conversationId: Uuid = Field(..., description="ID of conversation")
     user1_Id: Uuid = Field(..., description="ID of first user")
     user2_Id: Uuid = Field(..., description="ID of second user")
-    dateCreated: datetime = Field(..., description="date conversation initiated")
-    lastMessage: str = Field(
-        ..., min_length=1, max_length=256, description="last message in conversation"
-    )
+    dateCreated: Optional[datetime] = Field(None, description="date conversation initiated")
+    lastMessage: Optional[str] = Field(None, description="last message in conversation")
