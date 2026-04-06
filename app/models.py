@@ -51,7 +51,7 @@ class Message(Base):
     )
 
     messageText = Column(String(250), nullable=False)
-    timeStamp = Column(DateTime, nullable=False)
+    timestamp = Column(DateTime, nullable=False)
     delivered = Column(Boolean, nullable=False, server_default="false")
 
 

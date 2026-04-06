@@ -41,7 +41,7 @@ class ConnectionManager:
                     "senderId": str(msg.senderId),
                     "recipientId": str(msg.recipientId),
                     "message": msg.messageText,
-                    "timestamp": msg.timeStamp.isoformat(),
+                    "timestamp": msg.timestamp.isoformat(),
                     "deliveryStatus": "delivered",
                 },
             })

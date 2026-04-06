@@ -61,7 +61,7 @@ def save_message(recipientId: Uuid, messageText: str, senderId: Uuid) -> dict:
     return {
         "messageId": str(message_info.messageId),
         "conversationId": message_info.conversationId,
-        "timestamp": message_info.timeStamp,
+        "timestamp": message_info.timestamp,
         "message": message_info.messageText,
         "senderId": message_info.senderId,
         "recipientId": message_info.recipientId,

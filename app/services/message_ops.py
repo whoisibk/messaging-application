@@ -21,7 +21,7 @@ def create_message(
         senderId=senderId,
         recipientId=recipientId,
         messageText=messageText,
-        timeStamp=timestamp,
+        timestamp=timestamp,
         conversationId=conversationId,
     )
     db_session = session
@@ -86,7 +86,7 @@ def get_undelivered_messages(userId: UUID) -> List[Message]:
     messages = (
         db_session.query(Message)
         .filter(Message.recipientId == userId, Message.delivered == False)
-        .order_by(Message.timeStamp)
+        .order_by(Message.timestamp)
         .all()
     )
     return messages
