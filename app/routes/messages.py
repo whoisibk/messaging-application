@@ -70,7 +70,6 @@ def save_message(recipientId: Uuid, messageText: str, senderId: Uuid) -> dict:
     # realtime convo will be integrated later during websockets
 
 
-# @router.get("/{}/conversations")
 
 
 @router.get("/{conversationId}", response_model=List[readMessage])
@@ -94,7 +93,7 @@ def get_messages(
             "recipientId": message.recipientId,
             "conversationId": message.conversationId,
             "messageText": message.messageText,
-            "timestamp": message.timeStamp,
+            "timestamp": message.timestamp,
         }
         for message in messages
     ]

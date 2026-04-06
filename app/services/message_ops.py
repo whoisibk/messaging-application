@@ -4,6 +4,7 @@ from datetime import datetime
 from app.database import session
 from app.models import Conversation, Uuid, Message
 from app.services.conversation_ops import update_last_message
+from uuid import UUID
 
 """    Service functions for message operations    """
 
@@ -77,3 +78,26 @@ def delete_message(messageId: Uuid) -> bool:
     )
     db_session.commit()
     return True if rows_deleted > 0 else False
+
+
+def get_undelivered_messages(userId: UUID) -> List[Message]:
+    """Retrieve all undelivered messages for a user, ordered by timestamp."""
+    db_session = session
+    messages = (
+        db_session.query(Message)
+        .filter(Message.recipientId == userId, Message.delivered == False)
+        .order_by(Message.timeStamp)
+        .all()
+    )
+    return messages
+
+
+def mark_messages_delivered(messageIds: List[UUID]) -> None:
+    """Mark a list of messages as delivered."""
+    if not messageIds:
+        return
+    db_session = session
+    db_session.query(Message).filter(Message.messageId.in_(messageIds)).update(
+        {"delivered": True}, synchronize_session="fetch"
+    )
+    db_session.commit()

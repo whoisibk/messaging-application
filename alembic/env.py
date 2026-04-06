@@ -27,7 +27,7 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
 
-config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
+config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL").replace("%", "%%"))
 
 
 def run_migrations_offline() -> None:
@@ -44,7 +44,7 @@ def run_migrations_offline() -> None:
     """
     config = context.config
     real_url = os.getenv("DATABASE_URL")
-    config.set_main_option("sqlalchemy.url", real_url)
+    config.set_main_option("sqlalchemy.url", real_url.replace("%", "%%"))
     
     context.configure(
         url=real_url,

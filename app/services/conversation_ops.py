@@ -83,8 +83,8 @@ def delete_conversation(conversationId: Uuid) -> bool:
     rows_deleted = (
         db_session.query(Conversation)
         .filter(Conversation.conversationId == conversationId)
-        .first()
+        .delete()
     )
     db_session.commit()
 
-    return True if rows_deleted > 0 else False
+    return rows_deleted > 0

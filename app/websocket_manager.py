@@ -2,6 +2,7 @@ from fastapi import WebSocket
 from uuid import UUID as Uuid
 
 from app.routes.messages import save_message
+from app.services.message_ops import get_undelivered_messages, mark_messages_delivered
 
 
 class ConnectionManager:
@@ -24,6 +25,27 @@ class ConnectionManager:
         """
         await websocket.accept()
         self.active_connections[userId] = websocket
+        await self._deliver_offline_messages(userId, websocket)
+
+    async def _deliver_offline_messages(self, userId: Uuid, websocket: WebSocket):
+        """Push any undelivered messages to a user who just connected."""
+        missed = get_undelivered_messages(userId)
+        if not missed:
+            return
+        for msg in missed:
+            await websocket.send_json({
+                "event": "message",
+                "data": {
+                    "messageId": str(msg.messageId),
+                    "conversationId": str(msg.conversationId),
+                    "senderId": str(msg.senderId),
+                    "recipientId": str(msg.recipientId),
+                    "message": msg.messageText,
+                    "timestamp": msg.timeStamp.isoformat(),
+                    "deliveryStatus": "delivered",
+                },
+            })
+        mark_messages_delivered([msg.messageId for msg in missed])
 
     def disconnect(self, userId: Uuid):
         """
@@ -92,6 +114,7 @@ class ConnectionManager:
                     },
                 }
             )
+            mark_messages_delivered([Uuid(outbound_message["messageId"])])
             deliveryStatus = "delivered"
 
         return {

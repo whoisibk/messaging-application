@@ -6,6 +6,7 @@ from app.services.conversation_ops import (
     conversations_for_user,
     Conversation,
     get_conversation_by_Id as get_convoId,
+    delete_conversation,
 )
 from app.routes.users import get_current_user, User, Uuid
 
@@ -38,5 +39,13 @@ def get_conversation_by_Id(conversationId: Uuid) -> Conversation_:
     return conversation
 
 
-# @router.delete()
-# def delete_conversation()
+@router.delete('/{conversationId}')
+def delete__conversation(conversationId: Uuid):
+    """Delete a conversation and all associated messages"""
+    success = delete_conversation(conversationId)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conversation not found",
+        )
+    return {"detail": "Conversation deleted successfully"}

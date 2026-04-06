@@ -1,7 +1,7 @@
 import uuid
 
 from sqlalchemy.dialects.postgresql import UUID as Uuid  # id generator
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey  # column datatypes
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean  # column datatypes
 from sqlalchemy.ext.declarative import declarative_base
 
 # base class for ORM
@@ -52,6 +52,7 @@ class Message(Base):
 
     messageText = Column(String(250), nullable=False)
     timeStamp = Column(DateTime, nullable=False)
+    delivered = Column(Boolean, nullable=False, server_default="false")
 
 
 class Conversation(Base):

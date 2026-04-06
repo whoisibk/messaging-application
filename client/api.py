@@ -36,11 +36,12 @@ def get_my_profile():
     return profile
 
 
-def get_messages():
+def get_messages(conversationId: str):
 
     response = httpx.get(
-        url=f"{API_BASE_URL}/messages/get_messages", headers=auth_headers()
+        url=f"{API_BASE_URL}/messages/{conversationId}", headers=auth_headers()
     )
+    response.raise_for_status()
     return response.json()
 
 
