@@ -4,8 +4,8 @@ from datetime import datetime
 from uuid import UUID as Uuid
 
 from app.schemas import readMessage
-from app.services.message_ops import *
-from app.services.conversation_ops import *
+from app.services.message_ops import create_message, get_messagesInConversation_by_userId
+from app.services.conversation_ops import get_conversationId_between_users, create_conversation
 from app.routes.users import get_current_user, User
 from app.services.user_ops import get_user_by_Id
 

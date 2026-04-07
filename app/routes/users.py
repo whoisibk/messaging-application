@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.post("/signup", response_model=readUser)
-def signup(user: createUser) -> User:
+def signup(user: createUser):
     """
     Endpoint for user signup
     Args:
@@ -134,7 +134,7 @@ def get_current_user_ws(websocket: WebSocket) -> User:
 
 
 @router.get("/profile/me", response_model=readUser)
-def get_my_profile(current_user: User = Depends(get_current_user)) -> User:
+def get_my_profile(current_user: User = Depends(get_current_user)):
     """
     Endpoint to get the profile of the currently authenticated user
     Args:
@@ -146,7 +146,7 @@ def get_my_profile(current_user: User = Depends(get_current_user)) -> User:
 
 
 @router.get("/profile/{userId}", response_model=readUser)
-def get_user_profile(userId: Uuid) -> User:
+def get_user_profile(userId: Uuid):
     """
     Endpoint to get a user's profile by userId
     Args:
@@ -161,7 +161,7 @@ def get_user_profile(userId: Uuid) -> User:
 def get_user_by_username_lookup(
     userName: str,
     current_user: User = Depends(get_current_user),
-) -> User:
+):
     """Retrieve user profile by username for recipient resolution."""
     user = get_user_by_userName(userName)
     if user is None:
