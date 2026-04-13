@@ -81,4 +81,13 @@ def conversations():
     response = httpx.get(
         url=f"{API_BASE_URL}/conversations/get-conversations", headers=auth_headers()
     )
+    response.raise_for_status()
+    return response.json()
+
+
+def get_user_by_id(userId: str) -> dict:
+    response = httpx.get(
+        url=f"{API_BASE_URL}/users/profile/{userId}", headers=auth_headers()
+    )
+    response.raise_for_status()
     return response.json()

@@ -1,10 +1,11 @@
 from pathlib import Path
 import json
+import os
 
 
 # Path(__file__) is the location of token_storage.py
 # .parent is the 'client' directory
-TOKEN_PATH = Path(__file__).parent / "mytoken.json"
+TOKEN_PATH = Path(__file__).parent / f"mytoken_{os.getenv('CHAT_USER', 'default')}.json"
 
 # TOKEN_PATH.touch(exist_ok=True)  # This physically creates the empty file NOW
 
