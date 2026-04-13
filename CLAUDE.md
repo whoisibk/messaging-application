@@ -35,9 +35,14 @@ FastAPI backend + Python CLI client (ChatCLI). PostgreSQL DB via SQLAlchemy + Al
 - Updated all references in `message_ops.py`, `routes/messages.py`, and `websocket_manager.py`.
 
 ### Item 2 — Wire client menu options 3 & 4 in client/main.py (DONE)
-- Added `get_messages` and `conversations` to imports from `client.api`.
-- **Case 4 (View conversations)**: Calls `conversations()`, prints each with index, conversationId, and lastMessage.
-- **Case 3 (View messages)**: Shows conversations list, prompts user to pick one by index, calls `get_messages(conversationId)`, prints each message with sender and timestamp.
+- Added `get_messages`, `conversations`, `get_user_by_id` to imports from `client.api`.
+- Added `get_user_by_id(userId)` to `client/api.py` hitting `GET /users/profile/{userId}`.
+- **Case 4 (View conversations)**: Resolves other user's username via `get_user_by_id`, prints `1. alice — last message`.
+- **Case 3 (View messages)**: Same list, user picks one, messages printed as `[YYYY-MM-DD HH:MM] You: ...` or `[...] alice: ...`.
+
+### Per-user token isolation (DONE)
+- **client/token_storage.py**: Token file name scoped to `CHAT_USER` env var (`mytoken_{CHAT_USER}.json`).
+- Run two CLI sessions on same machine: `CHAT_USER=alice python -m client.main` and `CHAT_USER=bob python -m client.main`.
 
 ---
 
@@ -48,6 +53,7 @@ _Nothing tracked yet. Add new items here as they come up._
 ---
 
 ## Recent Commits (on develop branch)
+- `3056f23` — Wire menu cases 3 & 4, add per-user token isolation, add CLAUDE.md
 - `8481ab7` — Fix FastAPIError caused by SQLAlchemy UUID types leaking into Pydantic fields
 - `2f8585f` — Rename Message.timeStamp to timestamp and add migration
 - `400d750` — Fix delete_conversation bug, add offline message delivery, fix get_messages URL
