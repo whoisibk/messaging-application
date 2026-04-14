@@ -27,13 +27,7 @@ def get_my_profile():
     """Fetch the profile of the currently authenticated user."""
     response = httpx.get(url=f"{API_BASE_URL}/users/profile/me", headers=auth_headers())
     response.raise_for_status()
-
-    profile = response.json()
-
-    # Print user profile details
-    for title, data in profile.items():
-        print(f"{title}: {data}") 
-    return profile
+    return response.json()
 
 
 def get_messages(conversationId: str):

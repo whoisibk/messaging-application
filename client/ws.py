@@ -5,10 +5,22 @@ import websockets
 from fastapi import WebSocket
 from websockets.exceptions import ConnectionClosed
 
-from client.api import get_user_by_username
+from client.api import get_user_by_username, get_user_by_id
 
 
 """Client-side program to handle websocket connections for real-time messaging."""
+
+_sender_cache: dict[str, str] = {}
+
+
+def _resolve_sender(sender_id: str) -> str:
+    if sender_id not in _sender_cache:
+        try:
+            user = get_user_by_id(sender_id)
+            _sender_cache[sender_id] = user["userName"]
+        except Exception:
+            _sender_cache[sender_id] = sender_id
+    return _sender_cache[sender_id]
 
 
 async def receive_messages(websocket: WebSocket):
@@ -30,15 +42,11 @@ async def receive_messages(websocket: WebSocket):
         data = event.get("data", {})
 
         if event_name == "message":
-            print(
-                f"\n[from {data.get('senderId')}] {data.get('message')} "
-                f"({data.get('timestamp')})"
-            )
+            sender = _resolve_sender(str(data.get("senderId", "")))
+            ts = str(data.get("timestamp", ""))[:16].replace("T", " ")
+            print(f"\n[{ts}] {sender}: {data.get('message')}")
         elif event_name == "ack":
-            print(
-                f"\n[ack] {data.get('deliveryStatus')} "
-                f"conversation={data.get('conversationId')}"
-            )
+            print(f"\n[sent] {data.get('deliveryStatus')}")
         elif event_name == "error":
             print(f"\n[error] {event.get('detail')}")
         else:

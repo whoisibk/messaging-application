@@ -51,8 +51,6 @@ This is a **full-stack real-time messaging application** built with modern Pytho
 - 🔄 **Database migrations** with Alembic
 - 🖥️ **CLI client** for testing and demonstration
 
-Whether you're learning about WebSockets, building a chat application, or looking for a reference implementation of FastAPI best practices, this project serves as a comprehensive example. 
-
 ---
 
 ## ✨ Features
@@ -64,18 +62,19 @@ Whether you're learning about WebSockets, building a chat application, or lookin
   - JWT token-based authentication
   - OAuth2 password flow implementation
   - Token refresh and validation
+  - Per-user token isolation for multi-session use
 
 - ✅ **Real-Time Messaging**
   - WebSocket connections for instant message delivery
   - Bi-directional communication
   - Online/offline user detection
-  - Message persistence for offline users
+  - Offline message delivery — undelivered messages are pushed on reconnect
 
 - ✅ **Conversation Management**
   - One-on-one conversations
   - Automatic conversation creation
-  - Message history retrieval
-  - Conversation listing per user
+  - Message history retrieval with resolved usernames
+  - Conversation listing with last message preview
 
 - ✅ **Data Persistence**
   - PostgreSQL database integration
@@ -94,7 +93,7 @@ Whether you're learning about WebSockets, building a chat application, or lookin
 - 🏗️ **Clean Architecture**
   - Layered architecture (routes, services, models)
   - Dependency injection
-  - Separation of concerns
+  - Separation of concerns — API layer, actions layer, and menu layer are distinct
   - Type hints throughout
 
 - 📊 **API Design**
@@ -110,7 +109,7 @@ Whether you're learning about WebSockets, building a chat application, or lookin
 ### System Architecture
 
 ```
-┌─────────────┐         ┌────────────���─────────────────────────┐
+┌─────────────┐         ┌──────────────────────────────────────┐
 │   Client    │◄───────►│          FastAPI Server              │
 │             │  HTTP   │                                      │
 │  - CLI App  │  WS     │  ┌────────────┐  ┌──────────────┐  │
@@ -124,17 +123,17 @@ Whether you're learning about WebSockets, building a chat application, or lookin
                         │  ┌──────▼────────────────▼──────┐  │
                         │  │      Services Layer          │  │
                         │  │                              │  │
-                        │  │  • User Operations          │  │
-                        │  │  • Message Operations       │  │
-                        │  │  • Conversation Operations  │  │
+                        │  │  • User Operations           │  │
+                        │  │  • Message Operations        │  │
+                        │  │  • Conversation Operations   │  │
                         │  └──────────────┬───────────────┘  │
                         │                 │                  │
                         │  ┌──────────────▼───────────────┐  │
                         │  │     Database (PostgreSQL)    │  │
                         │  │                              │  │
-                        │  │  • Users Table              │  │
-                        │  │  • Messages Table           │  │
-                        │  │  • Conversations Table      │  │
+                        │  │  • Users Table               │  │
+                        │  │  • Messages Table            │  │
+                        │  │  • Conversations Table       │  │
                         │  └──────────────────────────────┘  │
                         └──────────────────────────────────────┘
 ```
@@ -169,7 +168,7 @@ Client A → WS Manager → Service → Database → WS Manager → Client B
 ### Client
 - **Python** - CLI client implementation
 - **websockets** - WebSocket client library
-- **requests** - HTTP library for API calls
+- **httpx** - Async-capable HTTP library for API calls
 
 ---
 
@@ -202,20 +201,20 @@ messaging-application/
 │
 ├── 📂 client/                       # CLI client application
 │   ├── 📄 __init__.py
-│   ├── 📄 main.py                   # Client entry point
-│   ├── 📄 auth.py                   # Authentication handlers
-│   ├── 📄 api.py                    # REST API client
-│   ├── 📄 ws. py                     # WebSocket client
-│   └── 📄 token_storage.py          # Token persistence
+│   ├── 📄 main.py                   # Menu system — calls action functions only
+│   ├── 📄 actions.py                # Orchestration layer — business logic & output
+│   ├── 📄 auth.py                   # Authentication handlers (login/signup/logout)
+│   ├── 📄 api.py                    # Pure HTTP layer — fetches and returns data
+│   ├── 📄 ws.py                     # WebSocket client — real-time chat session
+│   └── 📄 token_storage.py          # Token persistence (scoped per CHAT_USER)
 │
 ├── 📂 alembic/                      # Database migrations
 │   ├── 📄 env.py
-│   ├── 📄 script.py. mako
+│   ├── 📄 script.py.mako
 │   └── 📂 versions/
 │
 ├── 📄 alembic.ini                   # Alembic configuration
-├── 📄 guide.txt                     # Development guide
-├── 📄 . gitignore
+├── 📄 .gitignore
 └── 📄 README.md                     # This file
 ```
 
@@ -242,57 +241,37 @@ cd messaging-application
 ### Step 2: Create Virtual Environment
 
 ```bash
-# Create virtual environment
 python -m venv venv
 
-# Activate virtual environment
 # On Windows:
 venv\Scripts\activate
 
-# On macOS/Linux: 
+# On macOS/Linux:
 source venv/bin/activate
 ```
 
 ### Step 3: Install Dependencies
 
 ```bash
-# Install required packages
-pip install fastapi uvicorn sqlalchemy psycopg2-binary alembic pydantic python-jose[cryptography] passlib[bcrypt] websockets python-multipart requests
-
-# Or if you have requirements.txt:
 pip install -r requirements.txt
 ```
 
 ### Step 4: Database Setup
 
 ```bash
-# Create PostgreSQL database
-createdb messaging_app_db
-
-# Or using psql:
+# Using psql:
 psql -U postgres
 CREATE DATABASE messaging_app_db;
 \q
 ```
 
-### Step 5: Configure Database Connection
+### Step 5: Configure Environment
 
-Update the database connection string in `app/database.py`:
-
-```python
-DATABASE_URL = "postgresql://username:password@localhost/messaging_app_db"
-```
+Create a `.env` file in the project root (see [Configuration](#%EF%B8%8F-configuration)).
 
 ### Step 6: Run Database Migrations
 
 ```bash
-# Initialize Alembic (if not already done)
-alembic init alembic
-
-# Create initial migration
-alembic revision --autogenerate -m "Initial migration"
-
-# Apply migrations
 alembic upgrade head
 ```
 
@@ -300,32 +279,31 @@ alembic upgrade head
 
 ## ⚙️ Configuration
 
-### Environment Variables
-
 Create a `.env` file in the project root:
 
 ```env
-# Database Configuration
+# Database
 DATABASE_URL=postgresql://username:password@localhost/messaging_app_db
 
-# JWT Configuration
+# JWT
 SECRET_KEY=your-secret-key-here-change-in-production
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
-# Server Configuration
+# Server
 HOST=127.0.0.1
 PORT=8000
-DEBUG=True
 
-# CORS Settings (for web clients)
-ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
+# Client
+API_BASE_URL=http://127.0.0.1:8000
+
+# Multi-session isolation — set per terminal to run two clients on the same machine
+CHAT_USER=alice
 ```
 
-### Generate Secret Key
+### Generate a Secret Key
 
 ```python
-# Generate a secure secret key
 import secrets
 print(secrets.token_urlsafe(32))
 ```
@@ -338,13 +316,7 @@ print(secrets.token_urlsafe(32))
 
 ```bash
 # Development mode with auto-reload
-python -m app.main
-
-# Or using uvicorn directly
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-
-# Production mode
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
 ```
 
 The server will start at `http://127.0.0.1:8000`
@@ -352,25 +324,46 @@ The server will start at `http://127.0.0.1:8000`
 ### Using the CLI Client
 
 ```bash
-# Start the CLI client
 python -m client.main
 ```
 
-**CLI Menu Options:**
+The CLI has two menu screens:
 
-1. **Login** - Authenticate with existing credentials
-2. **Sign Up** - Create a new user account
-3. **View Profile** - Display current user information
-4. **Send Message** - Send a message to another user
-5. **View Messages** - Retrieve message history
-6. **View Conversations** - List all conversations
-7. **Logout** - End current session
+**When not logged in:**
+```
+1. Login
+2. Sign Up
+3. Exit
+```
+
+**When logged in:**
+```
+1. View my profile
+2. Send a message      ← opens real-time WebSocket chat, type /quit to exit
+3. View messages       ← pick a conversation, see history with usernames
+4. View conversations  ← list all conversations with last message preview
+5. Logout
+```
+
+The menu loops after every action — you are always returned to the menu until you log out or exit.
+
+### Running Multiple Sessions on the Same Machine
+
+Token files are scoped to `CHAT_USER`, so two terminals can be logged in as different users simultaneously:
+
+```bash
+# Terminal 1
+CHAT_USER=alice python -m client.main
+
+# Terminal 2
+CHAT_USER=bob python -m client.main
+```
 
 ### API Documentation
 
-Once the server is running, visit: 
+Once the server is running:
 
-- **Swagger UI**:  http://127.0.0.1:8000/docs
+- **Swagger UI**: http://127.0.0.1:8000/docs
 - **ReDoc**: http://127.0.0.1:8000/redoc
 
 ---
@@ -436,7 +429,9 @@ Authorization: Bearer <access_token>
     "senderId": "550e8400-e29b-41d4-a716-446655440000",
     "recipientId": "770e8400-e29b-41d4-a716-446655440000",
     "conversationId": "880e8400-e29b-41d4-a716-446655440000",
-    "messageText": "Hello, how are you?"
+    "messageText": "Hello, how are you?",
+    "timestamp": "2026-04-14T10:30:00",
+    "delivered": true
   }
 ]
 ```
@@ -455,14 +450,17 @@ Authorization: Bearer <access_token>
   {
     "conversationId": "880e8400-e29b-41d4-a716-446655440000",
     "user1_Id": "550e8400-e29b-41d4-a716-446655440000",
-    "user2_Id": "770e8400-e29b-41d4-a716-446655440000"
+    "user2_Id": "770e8400-e29b-41d4-a716-446655440000",
+    "dateCreated": "2026-04-14T09:00:00",
+    "lastMessage": "Hello, how are you?"
   }
 ]
 ```
 
-#### Get Conversation by ID
+#### Delete Conversation
 ```http
-GET /conversations/{conversationId}
+DELETE /conversations/{conversationId}
+Authorization: Bearer <access_token>
 ```
 
 ---
@@ -471,48 +469,61 @@ GET /conversations/{conversationId}
 
 ### Connection
 
-```javascript
-// WebSocket endpoint
-ws://127.0.0.1:8000/ws
-
-// Connection with authentication
-const ws = new WebSocket('ws://127.0.0.1:8000/ws', {
-  headers: {
-    'Authorization': 'Bearer <access_token>'
-  }
-});
+```
+ws://127.0.0.1:8000/ws/chat?token=<access_token>
 ```
 
-### Message Format
+### Sending a Message
 
-**Sending a Message:**
 ```json
 {
-  "senderId": "550e8400-e29b-41d4-a716-446655440000",
   "recipientId": "770e8400-e29b-41d4-a716-446655440000",
-  "message": "Hello, this is a test message"
+  "message": "Hello!"
 }
 ```
 
-**Receiving a Message:**
+### Server Events
+
+All server-to-client frames are JSON with an `event` field:
+
+**Incoming message (`event: "message"`):**
 ```json
 {
-  "status": 200,
-  "conversationId": "880e8400-e29b-41d4-a716-446655440000",
-  "timestamp": "2026-01-22T10:30:00",
-  "message": "Hello, this is a test message",
-  "sent by": "550e8400-e29b-41d4-a716-446655440000"
+  "event": "message",
+  "data": {
+    "senderId": "550e8400-e29b-41d4-a716-446655440000",
+    "message": "Hello!",
+    "timestamp": "2026-04-14T10:30:00"
+  }
+}
+```
+
+**Delivery acknowledgement (`event: "ack"`):**
+```json
+{
+  "event": "ack",
+  "data": {
+    "deliveryStatus": "delivered"
+  }
+}
+```
+
+**Error (`event: "error"`):**
+```json
+{
+  "event": "error",
+  "detail": "Recipient not found"
 }
 ```
 
 ### Connection Manager
 
-The `ConnectionManager` class handles:
+The `ConnectionManager` handles:
 - ✅ WebSocket connection lifecycle
-- ✅ User online/offline status
+- ✅ Online/offline user detection
 - ✅ Message routing to connected users
-- ✅ Automatic message persistence for offline users
-- ✅ Broadcasting capabilities
+- ✅ Offline message delivery on reconnect
+- ✅ Marking messages as delivered
 
 ---
 
@@ -522,7 +533,7 @@ The `ConnectionManager` class handles:
 
 | Column | Type | Constraints |
 |--------|------|-------------|
-| userId | UUID | PRIMARY KEY, UNIQUE |
+| userId | UUID | PRIMARY KEY |
 | userName | VARCHAR(15) | UNIQUE, NOT NULL |
 | userEmail | VARCHAR(100) | UNIQUE, NOT NULL |
 | passwordHash | VARCHAR(255) | NOT NULL |
@@ -535,19 +546,22 @@ The `ConnectionManager` class handles:
 | Column | Type | Constraints |
 |--------|------|-------------|
 | messageId | UUID | PRIMARY KEY |
-| senderId | UUID | FOREIGN KEY → user. userId |
-| recipientId | UUID | FOREIGN KEY → user. userId |
-| conversationId | UUID | FOREIGN KEY → conversation. conversationId |
+| senderId | UUID | FOREIGN KEY → user.userId |
+| recipientId | UUID | FOREIGN KEY → user.userId |
+| conversationId | UUID | FOREIGN KEY → conversation.conversationId |
 | messageText | VARCHAR(250) | NOT NULL |
-| timeStamp | TIMESTAMP | NOT NULL |
+| timestamp | TIMESTAMP | NOT NULL |
+| delivered | BOOLEAN | NOT NULL, default false |
 
 ### Conversations Table
 
 | Column | Type | Constraints |
 |--------|------|-------------|
-| conversationId | UUID | PRIMARY KEY, UNIQUE |
-| user1_Id | UUID | FOREIGN KEY → user. userId |
+| conversationId | UUID | PRIMARY KEY |
+| user1_Id | UUID | FOREIGN KEY → user.userId |
 | user2_Id | UUID | FOREIGN KEY → user.userId |
+| dateCreated | TIMESTAMP | NOT NULL |
+| lastMessage | VARCHAR(250) | nullable |
 
 ### Entity Relationship Diagram
 
@@ -572,9 +586,10 @@ The `ConnectionManager` class handles:
 │ conversationId   │         │ messageId (PK)   │
 │ user1_Id (FK)    │         │ senderId (FK)    │
 │ user2_Id (FK)    │         │ recipientId (FK) │
-└──────────────────┘         │ conversationId   │
-                             │ messageText      │
-                             │ timeStamp        │
+│ dateCreated      │         │ conversationId   │
+│ lastMessage      │         │ messageText      │
+└──────────────────┘         │ timestamp        │
+                             │ delivered        │
                              └──────────────────┘
 ```
 
@@ -582,48 +597,35 @@ The `ConnectionManager` class handles:
 
 ## 🖥️ Client Application
 
+### Architecture
+
+The client is split into three layers with clear responsibilities:
+
+```
+client/
+├── main.py          # Menu system only — calls action functions, no logic
+├── actions.py       # Orchestration layer — combines API calls, handles I/O & printing
+├── auth.py          # Login / signup / logout flows
+├── api.py           # Pure HTTP layer — one function per endpoint, no side effects
+├── ws.py            # WebSocket client — real-time chat session
+└── token_storage.py # Token persistence, scoped to CHAT_USER env var
+```
+
+| Layer | Responsibility |
+|-------|---------------|
+| `main.py` | Displays menus, reads user input, calls the right action |
+| `actions.py` | Orchestrates API calls, formats output, handles conversation/message flows |
+| `api.py` | Makes HTTP requests, returns raw data — no printing |
+| `ws.py` | Manages WebSocket connection, resolves sender IDs to usernames in real time |
+
 ### Features
 
-The CLI client (`client/`) provides: 
-
-- 🔐 **User authentication** (login/signup)
-- 💬 **Real-time messaging** via WebSocket
-- 📋 **Profile viewing**
-- 💾 **Token persistence** across sessions
-- 🎨 **User-friendly CLI interface**
-
-### Client Architecture
-
-```python
-client/
-├── main.py              # Entry point & menu system
-├── auth.py              # Login/signup handlers
-├── api.py               # REST API client
-├── ws.py                # WebSocket client
-└── token_storage.py     # Token persistence
-```
-
-### Example Usage
-
-```python
-# client/main.py
-
-from client.auth import SignUp, Login
-from client.api import send_message
-from client.ws import WebSocketClient
-
-# User flow
-if not logged_in:
-    Login()  # or SignUp()
-
-# Send message via API
-send_message(recipient_id, message_text)
-
-# Real-time WebSocket communication
-ws_client = WebSocketClient(token)
-await ws_client.connect()
-await ws_client.send_message(message_data)
-```
+- 🔐 **User authentication** (login/signup/logout)
+- 💬 **Real-time messaging** via WebSocket with usernames displayed
+- 📋 **Message history** with resolved usernames and timestamps
+- 📋 **Conversation list** with last message preview
+- 💾 **Token persistence** scoped per `CHAT_USER`
+- 🔄 **Persistent menus** — always returns to the menu after each action
 
 ---
 
@@ -631,37 +633,13 @@ await ws_client.send_message(message_data)
 
 ### Code Style
 
-This project follows:
 - **PEP 8** style guide
 - **Type hints** throughout
-- **Docstrings** for all functions/classes
-- **Clean architecture** principles
-
-### Project Guidelines
-
-1. **Separation of Concerns**
-   - Routes handle HTTP/WebSocket
-   - Services contain business logic
-   - Models define data structures
-   - Utils provide helper functions
-
-2. **Type Safety**
-   - Use Pydantic models for validation
-   - Add type hints to all functions
-   - Leverage Python 3.9+ features
-
-3. **Error Handling**
-   - Use appropriate HTTP status codes
-   - Provide descriptive error messages
-   - Handle database exceptions gracefully
+- **Separation of concerns** — API layer does not print; menu layer does not contain logic
 
 ### Running in Development Mode
 
 ```bash
-# With auto-reload
-uvicorn app.main:app --reload
-
-# With specific configuration
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --log-level debug
 ```
 
@@ -671,14 +649,9 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --log-level debug
 
 ### Manual Testing
 
-Use the interactive API documentation:
-
 ```bash
-# Start server
 python -m app.main
-
 # Visit http://127.0.0.1:8000/docs
-# Use the "Try it out" feature in Swagger UI
 ```
 
 ### Testing with cURL
@@ -687,29 +660,22 @@ python -m app.main
 # Sign up
 curl -X POST "http://127.0.0.1:8000/users/signup" \
   -H "Content-Type: application/json" \
-  -d '{
-    "userName": "testuser",
-    "userEmail":  "test@example.com",
-    "password": "testpass123",
-    "firstName": "Test",
-    "lastName": "User"
-  }'
+  -d '{"userName":"testuser","userEmail":"test@example.com","password":"testpass123","firstName":"Test","lastName":"User"}'
 
 # Login
 curl -X POST "http://127.0.0.1:8000/users/login" \
-  -H "Content-Type:  application/x-www-form-urlencoded" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=testuser&password=testpass123"
 
-# Get conversations (with token)
+# Get conversations
 curl -X GET "http://127.0.0.1:8000/conversations/get-conversations" \
   -H "Authorization: Bearer <your_token_here>"
 ```
 
 ### WebSocket Testing
 
-Use tools like: 
 - **[websocat](https://github.com/vi/websocat)** - CLI WebSocket client
-- **[Postman](https://www.postman.com/)** - API testing tool
+- **[Postman](https://www.postman.com/)** - API testing with WebSocket support
 - **Browser DevTools** - JavaScript WebSocket testing
 
 ---
@@ -720,67 +686,15 @@ Use tools like:
 
 - [ ] Set strong `SECRET_KEY` in environment
 - [ ] Configure production database
-- [ ] Set `DEBUG=False`
+- [ ] Set up HTTPS/WSS with a reverse proxy
 - [ ] Configure CORS for your frontend domain
-- [ ] Set up HTTPS/WSS with reverse proxy
 - [ ] Configure logging
 - [ ] Set up database backups
 - [ ] Implement rate limiting
-- [ ] Add monitoring and alerting
-
-### Using a Process Manager (PM2 or Systemd)
-
-#### With PM2
-
-```bash
-# Install PM2
-npm install -g pm2
-
-# Start the application
-pm2 start "uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4" --name messaging-app
-
-# Save PM2 configuration
-pm2 save
-
-# Set up PM2 to start on boot
-pm2 startup
-```
-
-#### With Systemd (Linux)
-
-Create a service file at `/etc/systemd/system/messaging-app.service`:
-
-```ini
-[Unit]
-Description=Messaging Application
-After=network. target
-
-[Service]
-Type=notify
-User=www-data
-WorkingDirectory=/path/to/messaging-application
-Environment="DATABASE_URL=postgresql://user:pass@localhost/messaging_db"
-Environment="SECRET_KEY=your-secret-key"
-ExecStart=/path/to/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Then: 
-```bash
-sudo systemctl daemon-reload
-sudo systemctl start messaging-app
-sudo systemctl enable messaging-app
-sudo systemctl status messaging-app
-```
 
 ### Nginx Reverse Proxy
 
 ```nginx
-# /etc/nginx/sites-available/messaging-app
-
 upstream messaging_app {
     server 127.0.0.1:8000;
 }
@@ -797,89 +711,15 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # WebSocket support
     location /ws {
         proxy_pass http://messaging_app;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
         proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
     }
 }
 ```
-
-Enable the site:
-```bash
-sudo ln -s /etc/nginx/sites-available/messaging-app /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl reload nginx
-```
-
-### SSL/TLS with Let's Encrypt
-
-```bash
-# Install certbot
-sudo apt install certbot python3-certbot-nginx
-
-# Get SSL certificate
-sudo certbot --nginx -d yourdomain.com
-
-# Auto-renewal is set up automatically
-```
-
-### Cloud Platform Deployment
-
-#### Heroku
-
-```bash
-# Install Heroku CLI and login
-heroku login
-
-# Create app
-heroku create your-app-name
-
-# Add PostgreSQL
-heroku addons:create heroku-postgresql:hobby-dev
-
-# Set environment variables
-heroku config:set SECRET_KEY=your-secret-key
-
-# Create Procfile
-echo "web: uvicorn app.main:app --host 0.0.0.0 --port \$PORT" > Procfile
-
-# Deploy
-git push heroku main
-```
-
-#### Railway
-
-```bash
-# Install Railway CLI
-npm i -g @railway/cli
-
-# Login
-railway login
-
-# Initialize project
-railway init
-
-# Add PostgreSQL
-railway add postgresql
-
-# Deploy
-railway up
-```
-
-#### DigitalOcean App Platform
-
-1. Connect your GitHub repository
-2. Select Python as your app type
-3. Set build command:  `pip install -r requirements.txt`
-4. Set run command: `uvicorn app.main:app --host 0.0.0.0 --port 8080`
-5. Add PostgreSQL database
-6. Configure environment variables
-7. Deploy! 
 
 ---
 
@@ -888,76 +728,44 @@ railway up
 ### Planned Features
 
 - [ ] **Group Messaging** - Multi-user conversations
-- [ ] **File Sharing** - Send images, documents, etc.
-- [ ] **Message Reactions** - Emoji reactions to messages
+- [ ] **File Sharing** - Send images and documents
 - [ ] **Typing Indicators** - Real-time typing status
-- [ ] **Read Receipts** - Message delivery confirmation
+- [ ] **Read Receipts** - Per-message read confirmation
 - [ ] **User Presence** - Online/offline/away status
-- [ ] **Message Search** - Full-text search capability
-- [ ] **Push Notifications** - Mobile/web notifications
+- [ ] **Message Search** - Full-text search
+- [ ] **Web Frontend** - Browser-based client
 - [ ] **Message Encryption** - End-to-end encryption
-- [ ] **Web Frontend** - React/Vue. js web client
-- [ ] **Mobile Apps** - iOS and Android clients
-- [ ] **Admin Dashboard** - User and system management
 
 ### Improvements
 
 - [ ] Unit and integration tests
 - [ ] API rate limiting
 - [ ] Redis for caching and session management
-- [ ] Message queue for async processing
-- [ ] Horizontal scaling support
-- [ ] Comprehensive logging
-- [ ] Performance monitoring
 - [ ] CI/CD pipeline
+- [ ] Comprehensive logging and monitoring
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how you can help:
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
-### How to Contribute
+### Guidelines
 
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Make your changes**
-4. **Commit your changes**
-   ```bash
-   git commit -m 'Add some amazing feature'
-   ```
-5. **Push to the branch**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-6. **Open a Pull Request**
-
-### Contribution Guidelines
-
-- Follow PEP 8 style guide
+- Follow PEP 8
 - Add type hints to new functions
-- Write docstrings for new modules/classes/functions
-- Update documentation as needed
-- Test your changes thoroughly
 - Keep PRs focused and atomic
-
-### Areas for Contribution
-
-- 🐛 Bug fixes
-- ✨ New features
-- 📝 Documentation improvements
-- 🧪 Test coverage
-- ♿ Accessibility improvements
-- 🌐 Internationalization
+- Update documentation as needed
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**.
 
 ```
 MIT License
@@ -994,18 +802,9 @@ SOFTWARE.
 
 ---
 
-## 🙏 Acknowledgments
-
-- [FastAPI](https://fastapi.tiangolo.com/) - Amazing web framework
-- [SQLAlchemy](https://www.sqlalchemy.org/) - Powerful ORM
-- [Pydantic](https://pydantic-docs.helpmanual.io/) - Data validation library
-- [PostgreSQL](https://www.postgresql.org/) - Robust database system
-
----
-
 <div align="center">
 
-**⭐ If you found this project helpful, please consider giving it a star!  ⭐**
+**⭐ If you found this project helpful, please consider giving it a star! ⭐**
 
 Made with ❤️ by [whoisibk](https://github.com/whoisibk)
 
